@@ -1,6 +1,6 @@
-# IndoSMM AI Dashboard
+# SmmPanel AI Dashboard
 
-Dashboard AI rekomendasi layanan SMM (Social Media Marketing) dengan tema dark biru-ungu. Dibangun dengan Nuxt 3 + Tailwind CSS, terinspirasi dari [ai.indosmm.web.id](https://ai.indosmm.web.id/) dengan redesign visual yang berbeda.
+Dashboard AI rekomendasi layanan SMM (Social Media Marketing) dengan tema dark biru-ungu. Dibangun dengan Nuxt 3 + Tailwind CSS, terinspirasi dari [ai.smmpanel.web.id](https://ai.smmpanel.web.id/) dengan redesign visual yang berbeda.
 
 ![Nuxt](https://img.shields.io/badge/Nuxt-3.21-00DC82?style=flat&logo=nuxt.js)
 ![Tailwind](https://img.shields.io/badge/Tailwind-3.4-38BDF8?style=flat&logo=tailwindcss)
@@ -15,7 +15,7 @@ Dashboard AI rekomendasi layanan SMM (Social Media Marketing) dengan tema dark b
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│  🤖 IndoSMM  │  Cari ID atau nama layanan...  │  🕐 16:13  ● Live │
+│  🤖 SmmPanel  │  Cari ID atau nama layanan...  │  🕐 16:13  ● Live │
 │  AI Dashboard│                                │                   │
 ├──────────────────────────────────────────────────────────────────┤
 │  ≡ Semua  📸 Instagram  🎵 TikTok  👍 Facebook  ▶️ YouTube  ...  │

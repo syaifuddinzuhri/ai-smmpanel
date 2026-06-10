@@ -1,4 +1,4 @@
-# IndoSMM AI Dashboard
+# SmmPanel AI Dashboard
 
 Dashboard AI rekomendasi layanan SMM (Social Media Marketing) berbasis Nuxt 3 dengan tema biru-ungu gelap.
 
@@ -102,7 +102,7 @@ Sidebar sticky (`top-[96px]`) agar tetap terlihat saat scroll tabel panjang.
 - **Ambient glow**: dua radial gradient fixed di background (indigo kiri atas, violet kanan tengah)
 - **Responsive**: tabel → card mobile di breakpoint `md` (768px); sub-bar scrollable horizontal di mobile
 
-## Perbedaan dari Referensi Asli (ai.indosmm.web.id)
+## Perbedaan dari Referensi Asli (ai.smmpanel.web.id)
 
 | Elemen | Referensi | Versi Ini |
 |---|---|---|

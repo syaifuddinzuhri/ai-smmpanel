@@ -46,7 +46,7 @@
 
       <!-- Footer bar -->
       <div class="mt-4 pb-5 flex items-center justify-between text-[11px] text-slate-700 border-t border-white/[0.04] pt-3">
-        <span>IndoSMM AI · Multi-Factor Scoring Engine v1.0</span>
+        <span>SmmPanel AI · Multi-Factor Scoring Engine v1.0</span>
         <span v-if="!isLoading">Update terakhir: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
       </div>
     </main>
@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'AI Rekomendasi Layanan — IndoSMM',
+  title: 'AI Rekomendasi Layanan — SmmPanel',
   meta: [{ name: 'description', content: 'AI-powered SMM panel service recommendation dashboard' }]
 })
 
