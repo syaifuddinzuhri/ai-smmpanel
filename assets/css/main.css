@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html { scroll-behavior: smooth; }
+  body { @apply bg-[#0b0d1a] text-slate-200 font-sans antialiased min-h-screen; }
+}
+
+@layer components {
+  .card {
+    @apply bg-[#111827]/80 border border-white/[0.07] rounded-xl backdrop-blur-sm;
+  }
+  .badge-green {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
+  }
+  .badge-red {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-red-500/10 text-red-400 border border-red-500/20;
+  }
+  .badge-yellow {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-500/10 text-amber-400 border border-amber-500/20;
+  }
+  .badge-blue {
+    @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-violet-500/10 text-violet-400 border border-violet-500/20;
+  }
+  .btn-tab {
+    @apply inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-[12px] font-semibold transition-all whitespace-nowrap;
+  }
+  .btn-tab-active {
+    @apply btn-tab bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30;
+  }
+  .btn-tab-inactive {
+    @apply btn-tab text-slate-400 hover:text-slate-200 hover:bg-white/5;
+  }
+  .period-btn {
+    @apply px-2.5 py-1 rounded-md text-[11px] font-bold transition-all whitespace-nowrap;
+  }
+  .period-active {
+    @apply period-btn bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/30;
+  }
+  .period-inactive {
+    @apply period-btn text-slate-500 hover:bg-white/5 hover:text-slate-300;
+  }
+  .score-bar {
+    @apply h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500;
+  }
+  .pulse-dot {
+    @apply w-1.5 h-1.5 rounded-full animate-pulse;
+  }
+  .stat-icon-wrap {
+    @apply w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0;
+  }
+  .skeleton {
+    @apply h-4 bg-white/5 rounded animate-pulse;
+  }
+}
+
+@layer utilities {
+  .gradient-text {
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .glow-indigo {
+    box-shadow: 0 0 30px rgba(99,102,241,0.15);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.3); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.5); }
