@@ -21,12 +21,12 @@
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
 
       <!-- Tab Switcher -->
-      <div class="flex items-center gap-1 bg-[#111827]/60 border border-white/[0.06] rounded-xl p-1 mb-5 w-fit">
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 bg-[#111827]/60 border border-white/[0.06] rounded-xl p-1 mb-5 w-full sm:w-fit">
         <button
           v-for="tab in mainTabs"
           :key="tab.key"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200',
+            'flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 whitespace-nowrap',
             activeTab === tab.key
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
               : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
@@ -34,7 +34,7 @@
           @click="activeTab = tab.key"
         >
           <span>{{ tab.icon }}</span>
-          <span class="hidden sm:inline">{{ tab.label }}</span>
+          <span>{{ tab.label }}</span>
         </button>
       </div>
 
