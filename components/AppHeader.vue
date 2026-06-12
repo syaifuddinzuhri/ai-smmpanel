@@ -72,8 +72,8 @@
       </div>
     </header>
 
-    <!-- Sub-bar: platform tabs -->
-    <div class="bg-[#0d1020]/90 backdrop-blur-xl border-b border-white/[0.04] overflow-x-auto scrollbar-hide">
+    <!-- Sub-bar: desktop tabs -->
+    <div class="hidden sm:block bg-[#0d1020]/90 backdrop-blur-xl border-b border-white/[0.04] overflow-x-auto scrollbar-hide">
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 flex items-center h-10 gap-0.5 min-w-max">
         <button
           v-for="p in platforms"
@@ -90,8 +90,6 @@
           <svg v-else class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
           {{ p.label }}
         </button>
-
-        <!-- Spacer + controls on right -->
         <div class="ml-auto flex items-center gap-2 pl-4">
           <div class="h-4 w-px bg-white/10"></div>
           <div class="flex items-center gap-1">
@@ -108,6 +106,28 @@
             >{{ per }}</button>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Sub-bar: mobile dropdowns -->
+    <div class="sm:hidden bg-[#0d1020]/90 backdrop-blur-xl border-b border-white/[0.04]">
+      <div class="flex items-center gap-2 px-4 h-11">
+        <select
+          :value="selectedPlatform"
+          @change="$emit('update:selectedPlatform', ($event.target as HTMLSelectElement).value)"
+          class="flex-1 bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[12px] text-slate-300 outline-none appearance-none cursor-pointer"
+        >
+          <option v-for="p in platforms" :key="p.label" :value="p.label">
+            {{ p.icon ? p.icon + ' ' : '' }}{{ p.label }}
+          </option>
+        </select>
+        <select
+          :value="selectedPeriod"
+          @change="$emit('update:selectedPeriod', ($event.target as HTMLSelectElement).value)"
+          class="bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-1.5 text-[12px] text-slate-300 outline-none appearance-none cursor-pointer"
+        >
+          <option v-for="per in periods" :key="per" :value="per">{{ per }}</option>
+        </select>
       </div>
     </div>
   </div>

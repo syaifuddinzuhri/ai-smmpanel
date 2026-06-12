@@ -52,7 +52,7 @@ function mapSpeed(type: string): Service['speed'] {
   return 'Cepat'
 }
 
-function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[] {
+function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] {
   if (!orders.length) return []
 
   // Aggregate by service_id
@@ -62,14 +62,12 @@ function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[]
     byService.get(o.service_id)!.push(o)
   }
 
-  // Previous order counts per service for trend calculation
-  const prevCount = new Map<number, number>()
-  for (const o of prevOrders) {
-    prevCount.set(o.service_id, (prevCount.get(o.service_id) ?? 0) + 1)
-  }
-
   const allCounts = [...byService.values()].map(os => os.length)
   const maxOrders = Math.max(...allCounts, 1)
+
+  const now = Date.now() / 1000
+  const half = windowSeconds / 2
+  const midpoint = now - half
 
   const services: Service[] = []
 
@@ -88,15 +86,22 @@ function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[]
       successRate * 0.55 + Math.max(0, 100 - cancelRate * 15) * 0.30 + volumeScore * 0.15
     )))
 
-    // Trend vs previous snapshot
-    const prev = prevCount.get(serviceId)
+    // Trend: bandingkan paruh baru vs paruh lama dalam window yang sama
+    // Order tanpa timestamp dianggap "recent" (tidak diketahui kapan)
+    const recentCount = svcOrders.filter(o => !o.created_timestamp || o.created_timestamp > midpoint).length
+    const prevCount = svcOrders.filter(o => o.created_timestamp && o.created_timestamp <= midpoint).length
+
     let trend: Service['trend'] = 'stable'
     let trendPercent = 0
-    if (prev !== undefined && prev > 0) {
-      const pct = ((total - prev) / prev) * 100
+    if (prevCount > 0) {
+      const pct = ((recentCount - prevCount) / prevCount) * 100
       trendPercent = parseFloat(pct.toFixed(1))
-      if (pct > 1) trend = 'up'
-      else if (pct < -1) trend = 'down'
+      if (pct > 5) trend = 'up'
+      else if (pct < -5) trend = 'down'
+    } else if (recentCount > 0) {
+      // Semua order baru (tidak ada di paruh lama) — trending naik
+      trend = 'up'
+      trendPercent = 100
     }
 
     const avgPrice = total > 0 ? svcOrders.reduce((s, o) => s + (Number(o.charge?.value) || 0), 0) / total : 0
@@ -132,7 +137,6 @@ function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[]
 
 export const useOrders = (period?: Ref<string>) => {
   const rawOrders = ref<RawOrder[]>([])
-  const prevRawOrders = ref<RawOrder[]>([])
   const isLoading = ref(true)
   const fromCache = ref(false)
   const apiError = ref<string | null>(null)
@@ -150,13 +154,12 @@ export const useOrders = (period?: Ref<string>) => {
 
   // Services recompute automatically when rawOrders or period changes
   const services = computed(() =>
-    ordersToServices(periodFiltered.value, prevRawOrders.value)
+    ordersToServices(periodFiltered.value, periodToSeconds(period?.value ?? '24J'))
   )
 
   const fetchOrders = async () => {
     try {
       const res = await $fetch<OrdersApiResponse>('/api/orders')
-      prevRawOrders.value = [...rawOrders.value]
       rawOrders.value = res.data ?? []
       fromCache.value = res.fromCache
       apiError.value = res.error ?? null
@@ -180,5 +183,5 @@ export const useOrders = (period?: Ref<string>) => {
     onUnmounted(() => clearInterval(timer))
   })
 
-  return { services, rawOrders, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders }
+  return { services, rawOrders, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders  }
 }
