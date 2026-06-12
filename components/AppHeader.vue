@@ -36,10 +36,23 @@
         </div>
 
         <div class="ml-auto flex items-center gap-3">
-          <!-- Update time -->
-          <div v-if="!isLoading" class="hidden md:flex items-center gap-1.5 text-[11px] text-slate-500">
-            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Update terakhir: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
+          <!-- Update time + Resync -->
+          <div v-if="!isLoading" class="hidden md:flex items-center gap-2">
+            <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Update terakhir: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
+            </div>
+            <button
+              @click="$emit('resync')"
+              title="Resync data"
+              class="flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 text-[11px] font-medium"
+            >
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M23 4v6h-6M1 20v-6h6"/>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+              </svg>
+              Resync
+            </button>
           </div>
           <!-- Status pill -->
           <div :class="[
@@ -112,5 +125,5 @@ defineProps<{
   selectedPlatform: string
   selectedPeriod: string
 }>()
-defineEmits(['update:searchQuery', 'update:selectedPlatform', 'update:selectedPeriod'])
+defineEmits(['update:searchQuery', 'update:selectedPlatform', 'update:selectedPeriod', 'resync'])
 </script>

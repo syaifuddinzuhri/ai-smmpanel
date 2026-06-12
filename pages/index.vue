@@ -18,6 +18,7 @@
       :selectedPeriod="selectedPeriod"
       @update:selectedPlatform="selectedPlatform = $event"
       @update:selectedPeriod="selectedPeriod = $event"
+      @resync="fetchOrders"
     />
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
@@ -82,6 +83,20 @@
         <span v-if="!isLoading">Update terakhir: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
       </div>
     </main>
+
+    <!-- Scroll to top -->
+    <Transition name="scroll-top">
+      <button
+        v-if="showScrollTop"
+        @click="scrollToTop"
+        class="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full bg-indigo-600/90 hover:bg-indigo-500 border border-indigo-500/40 shadow-lg shadow-indigo-500/20 flex items-center justify-center text-white backdrop-blur-sm transition-colors duration-200"
+        aria-label="Scroll to top"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="18 15 12 9 6 15" />
+        </svg>
+      </button>
+    </Transition>
   </div>
 </template>
 
@@ -101,6 +116,16 @@ const {
 
 const activeTab = ref('rekomendasi')
 
+const showScrollTop = ref(false)
+
+onMounted(() => {
+  const onScroll = () => { showScrollTop.value = window.scrollY > 300 }
+  window.addEventListener('scroll', onScroll, { passive: true })
+  onUnmounted(() => window.removeEventListener('scroll', onScroll))
+})
+
+const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
+
 const mainTabs = [
   { key: 'monitor', icon: '📡', label: 'Monitor Layanan' },
   { key: 'rekomendasi', icon: '🤖', label: 'AI Rekomendasi Layanan' },
@@ -116,5 +141,15 @@ const mainTabs = [
 .tab-fade-leave-to {
   opacity: 0;
   transform: translateY(6px);
+}
+
+.scroll-top-enter-active,
+.scroll-top-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.scroll-top-enter-from,
+.scroll-top-leave-to {
+  opacity: 0;
+  transform: translateY(8px);
 }
 </style>
