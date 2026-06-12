@@ -3,6 +3,7 @@
 .output/
 .nitro/
 .cache/
+.data/
 
 # Node
 node_modules/

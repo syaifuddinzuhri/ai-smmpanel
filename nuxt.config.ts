@@ -1,6 +1,18 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
+
+  runtimeConfig: {
+    apiBaseUrl: process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com',
+    apiKey: process.env.NUXT_API_KEY || '',
+    anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
+  },
+
+  nitro: {
+    storage: {
+      data: { driver: 'fs', base: './.data/kv' },
+    },
+  },
   modules: ['@nuxtjs/tailwindcss'],
   app: {
     head: {

@@ -10,6 +10,8 @@
       v-model:searchQuery="searchQuery"
       :isLoading="isLoading"
       :lastUpdate="lastUpdate"
+      :fromCache="fromCache"
+      :apiError="apiError"
       :platforms="platforms"
       :periods="periods"
       :selectedPlatform="selectedPlatform"
@@ -65,6 +67,7 @@
             <AiSidebar
               :isLoading="isLoading"
               :aiInsight="aiInsight"
+              :aiInsightLoading="aiInsightLoading"
               :topPerformers="topPerformers"
               :riskyServices="riskyServices"
               :trendingServices="trendingServices"
@@ -89,9 +92,11 @@ useHead({
 })
 
 const {
-  isLoading, selectedPlatform, selectedPeriod, selectedSort,
+  isLoading, fromCache, apiError,
+  selectedPlatform, selectedPeriod, selectedSort,
   searchQuery, platforms, periods, sortOptions, filteredServices,
-  stats, topPerformers, riskyServices, trendingServices, aiInsight, lastUpdate
+  stats, topPerformers, riskyServices, trendingServices,
+  aiInsight, aiInsightLoading, lastUpdate
 } = useServices()
 
 const activeTab = ref('rekomendasi')

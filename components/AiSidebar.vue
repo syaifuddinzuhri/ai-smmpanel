@@ -19,7 +19,8 @@
 
     <!-- Tab: AI Insight -->
     <div v-if="activeTab === 'insight'" class="p-4">
-      <div v-if="isLoading" class="space-y-2">
+      <!-- Skeleton: initial data load OR waiting for first LLM response -->
+      <div v-if="isLoading || (!aiInsight && aiInsightLoading)" class="space-y-2">
         <div class="skeleton w-full h-3"></div>
         <div class="skeleton w-5/6 h-3"></div>
         <div class="skeleton w-4/6 h-3"></div>
@@ -27,9 +28,16 @@
         <div class="skeleton w-3/6 h-3 mt-2"></div>
       </div>
       <div v-else>
-        <div class="flex items-center gap-2 mb-3">
-          <div class="w-6 h-6 rounded-md bg-indigo-500/20 flex items-center justify-center text-sm">✦</div>
-          <span class="text-[11px] font-bold uppercase tracking-widest text-indigo-400">Analisis Sistem</span>
+        <div class="flex items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2">
+            <div class="w-6 h-6 rounded-md bg-indigo-500/20 flex items-center justify-center text-sm">✦</div>
+            <span class="text-[11px] font-bold uppercase tracking-widest text-indigo-400">Analisis AI</span>
+          </div>
+          <!-- Pulse dot when LLM is refreshing in background -->
+          <span v-if="aiInsightLoading" class="flex items-center gap-1 text-[10px] text-violet-400">
+            <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse inline-block"></span>
+            Memperbarui…
+          </span>
         </div>
         <p class="text-[12.5px] text-slate-400 leading-relaxed">{{ aiInsight }}</p>
         <div class="mt-4 pt-3 border-t border-white/[0.06] grid grid-cols-2 gap-2">
@@ -57,10 +65,9 @@
           <div class="skeleton w-8 h-5 flex-shrink-0"></div>
         </div>
       </div>
-      <div v-else class="divide-y divide-white/[0.04]">
+      <div v-else class="divide-y divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="(svc, i) in topPerformers" :key="svc.id"
           class="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
-          <!-- Medal -->
           <div :class="[
             'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0',
             i === 0 ? 'bg-amber-500/20 text-amber-300' : i === 1 ? 'bg-slate-400/20 text-slate-300' : i === 2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-slate-500'
@@ -89,7 +96,7 @@
       <div v-else-if="trendingServices.length === 0" class="px-4 py-6 text-center">
         <p class="text-slate-600 text-[12px]">Tidak ada layanan trending saat ini</p>
       </div>
-      <div v-else class="divide-y divide-white/[0.04]">
+      <div v-else class="divide-y divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="svc in trendingServices" :key="svc.id"
           class="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
           <span class="text-[15px]">{{ svc.platformIcon }}</span>
@@ -113,7 +120,7 @@
         <span class="text-lg">✅</span>
         <span class="text-[12px] font-medium text-emerald-400">Tidak ada layanan berisiko!</span>
       </div>
-      <div v-else class="divide-y divide-white/[0.04]">
+      <div v-else class="divide-y divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="svc in riskyServices" :key="svc.id"
           class="flex items-center gap-3 px-4 py-3">
           <span class="text-[15px]">{{ svc.platformIcon }}</span>
@@ -143,6 +150,7 @@ import type { Service } from '~/composables/useServices'
 defineProps<{
   isLoading: boolean
   aiInsight: string
+  aiInsightLoading: boolean
   topPerformers: Service[]
   riskyServices: Service[]
   trendingServices: Service[]

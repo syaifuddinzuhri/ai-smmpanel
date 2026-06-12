@@ -58,14 +58,28 @@ const ALL_SERVICES: Service[] = [
   { id: 26, name: 'Shopee Ulasan Bintang 5 [Custom]', category: 'Reviews', platform: 'Shopee', platformIcon: '🛍️', aiScore: 88, successRate: 96.1, orderCount: 8940, cancelRate: 1.4, trend: 'stable', trendPercent: 2.1, price: 8000, minOrder: 1, speed: 'Sedang', quality: 'Premium' },
 ]
 
+interface InsightResponse { insight: string; source: 'llm' | 'rule' }
+
 export const useServices = () => {
-  const services = ref<Service[]>(ALL_SERVICES)
-  const isLoading = ref(true)
   const selectedPlatform = ref('Semua')
   const selectedPeriod = ref('24J')
   const selectedSort = ref('score')
   const searchQuery = ref('')
-  const lastUpdate = ref('')
+
+  const {
+    services: liveServices,
+    rawOrders,
+    isLoading,
+    fromCache,
+    apiError,
+    lastUpdate,
+    fetchOrders,
+  } = useOrders(selectedPeriod)
+
+  // Fall back to mock data only when the API has returned zero raw orders
+  const services = computed<Service[]>(() =>
+    rawOrders.value.length > 0 ? liveServices.value : ALL_SERVICES
+  )
 
   const platforms = [
     { label: 'Semua', icon: null },
@@ -130,39 +144,73 @@ export const useServices = () => {
   })
 
   const topPerformers = computed(() =>
-    [...services.value].sort((a, b) => b.aiScore - a.aiScore).slice(0, 5)
+    [...services.value].sort((a, b) => b.aiScore - a.aiScore).slice(0, 10)
   )
 
   const riskyServices = computed(() =>
-    services.value.filter(s => s.cancelRate > 2 || s.successRate < 95)
+    services.value
+      .filter(s => s.cancelRate > 2 || s.successRate < 95)
+      .sort((a, b) => b.cancelRate - a.cancelRate)
+      .slice(0, 10)
   )
 
   const trendingServices = computed(() =>
     [...services.value].filter(s => s.trend === 'up' && s.trendPercent > 8)
-      .sort((a, b) => b.trendPercent - a.trendPercent).slice(0, 5)
+      .sort((a, b) => b.trendPercent - a.trendPercent).slice(0, 10)
   )
 
-  const aiInsight = computed(() => {
-    const best = topPerformers.value[0]
-    const trendTop = trendingServices.value[0]
-    return `Berdasarkan analisis ${stats.value.total} layanan dalam periode ${selectedPeriod.value}, ` +
-      `layanan terbaik saat ini adalah "${best?.name}" dengan AI Score ${best?.aiScore}/100 dan success rate ${best?.successRate}%. ` +
-      (trendTop ? `Tren naik tertinggi terdeteksi pada "${trendTop.name}" (+${trendTop.trendPercent}%). ` : '') +
-      `${stats.value.risky > 0 ? `Terdapat ${stats.value.risky} layanan berisiko yang perlu diperhatikan.` : 'Semua layanan dalam kondisi baik.'}`
-  })
+  const aiInsight = ref<string>('')
+  const aiInsightLoading = ref(false)
 
-  // Simulate loading
-  onMounted(() => {
-    setTimeout(() => {
-      isLoading.value = false
-      const now = new Date()
-      lastUpdate.value = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-    }, 1800)
-  })
+  const fetchInsight = async () => {
+    if (!services.value.length) return
+    aiInsightLoading.value = true
+    try {
+      const res = await $fetch<InsightResponse>('/api/insight', {
+        method: 'POST',
+        body: {
+          period: selectedPeriod.value,
+          totalServices: stats.value.total,
+          avgScore: stats.value.avgScore,
+          avgSuccess: stats.value.avgSuccess,
+          totalOrders: stats.value.totalOrders,
+          riskyCount: stats.value.risky,
+          trendingCount: stats.value.trending,
+          topServices: topPerformers.value.map(s => ({
+            name: s.name,
+            aiScore: s.aiScore,
+            successRate: s.successRate,
+            orderCount: s.orderCount,
+            platform: s.platform,
+          })),
+          riskyServices: riskyServices.value.map(s => ({
+            name: s.name,
+            cancelRate: s.cancelRate,
+            successRate: s.successRate,
+          })),
+          trendingServices: trendingServices.value.map(s => ({
+            name: s.name,
+            trendPercent: s.trendPercent,
+            platform: s.platform,
+          })),
+        },
+      })
+      if (res.insight) aiInsight.value = res.insight
+    } catch {
+      // keep previous insight on failure
+    } finally {
+      aiInsightLoading.value = false
+    }
+  }
+
+  // Refresh insight whenever live services update (after each poll)
+  watch(liveServices, () => { fetchInsight() }, { deep: false })
 
   return {
-    services, isLoading, selectedPlatform, selectedPeriod, selectedSort,
+    services, isLoading, fromCache, apiError, fetchOrders,
+    selectedPlatform, selectedPeriod, selectedSort,
     searchQuery, platforms, periods, sortOptions, filteredServices,
-    stats, topPerformers, riskyServices, trendingServices, aiInsight, lastUpdate
+    stats, topPerformers, riskyServices, trendingServices,
+    aiInsight, aiInsightLoading, fetchInsight, lastUpdate
   }
 }

@@ -46,10 +46,14 @@
             'flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-bold tracking-widest border uppercase',
             isLoading
               ? 'bg-amber-500/10 border-amber-500/25 text-amber-400'
-              : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
+              : apiError
+                ? 'bg-red-500/10 border-red-500/25 text-red-400'
+                : fromCache
+                  ? 'bg-slate-500/10 border-slate-500/25 text-slate-400'
+                  : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
           ]">
-            <span :class="['w-1.5 h-1.5 rounded-full animate-pulse', isLoading ? 'bg-amber-400' : 'bg-emerald-400']"></span>
-            {{ isLoading ? 'Updating' : 'Live' }}
+            <span :class="['w-1.5 h-1.5 rounded-full animate-pulse', isLoading ? 'bg-amber-400' : apiError ? 'bg-red-400' : fromCache ? 'bg-slate-400' : 'bg-emerald-400']"></span>
+            {{ isLoading ? 'Updating' : apiError ? 'Error' : fromCache ? 'Cached' : 'Live' }}
           </div>
         </div>
       </div>
@@ -101,6 +105,8 @@ defineProps<{
   searchQuery: string
   isLoading: boolean
   lastUpdate: string
+  fromCache: boolean
+  apiError: string | null
   platforms: Array<{ label: string; icon: string | null }>
   periods: string[]
   selectedPlatform: string
