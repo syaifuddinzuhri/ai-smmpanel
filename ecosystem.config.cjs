@@ -1,3 +1,28 @@
+const fs = require('fs')
+const path = require('path')
+
+function loadEnv(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8')
+    const env = {}
+    for (const line of content.split('\n')) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const idx = trimmed.indexOf('=')
+      if (idx === -1) continue
+      const key = trimmed.slice(0, idx).trim()
+      const val = trimmed.slice(idx + 1).trim().replace(/^["']|["']$/g, '')
+      env[key] = val
+    }
+    return env
+  } catch {
+    console.warn('[ecosystem] .env file tidak ditemukan:', filePath)
+    return {}
+  }
+}
+
+const env = loadEnv(path.join(__dirname, '.env'))
+
 module.exports = {
   apps: [
     {
@@ -5,10 +30,10 @@ module.exports = {
       script: '.output/server/index.mjs',
       instances: 1,
       exec_mode: 'fork',
-      node_args: '--env-file=.env',
       env: {
         NODE_ENV: 'production',
         PORT: 4731,
+        ...env,
       },
       autorestart: true,
       watch: false,
