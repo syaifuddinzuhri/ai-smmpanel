@@ -6,7 +6,7 @@ APP_NAME="smm-panel-ai"
 echo "==> Node version..."
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm install 20 && nvm use 20
+nvm install 22 && nvm use 22
 
 echo "==> Git pull..."
 git restore package-lock.json
