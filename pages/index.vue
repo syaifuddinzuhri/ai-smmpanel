@@ -18,7 +18,7 @@
       :selectedPeriod="selectedPeriod"
       @update:selectedPlatform="selectedPlatform = $event"
       @update:selectedPeriod="selectedPeriod = $event"
-      @resync="fetchOrders"
+      @resync="resync"
     />
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
@@ -48,9 +48,10 @@
       <Transition name="tab-fade" mode="out-in">
         <div v-if="activeTab === 'monitor'" key="monitor">
           <MonitorLayanan
-            :services="filteredServices"
+            :services="rawServicesList"
             :isLoading="isLoading"
-            :stats="stats"
+            :searchQuery="searchQuery"
+            :selectedPlatform="selectedPlatform"
           />
         </div>
 
@@ -107,9 +108,10 @@ useHead({
 })
 
 const {
-  isLoading, fromCache, apiError,
+  isLoading, fromCache, apiError, resync,
   selectedPlatform, selectedPeriod, selectedSort,
   searchQuery, platforms, periods, sortOptions, filteredServices,
+  rawServicesList,
   stats, topPerformers, riskyServices, trendingServices,
   aiInsight, aiInsightLoading, lastUpdate
 } = useServices()

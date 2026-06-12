@@ -1,5 +1,6 @@
 import type { Ref } from 'vue'
 import type { RawOrder } from '~/server/api/orders.get'
+import type { RawService } from '~/server/api/services.get'
 import type { Service } from './useServices'
 
 function periodToSeconds(period: string): number {
@@ -14,6 +15,14 @@ function periodToSeconds(period: string): number {
 
 interface OrdersApiResponse {
   data: RawOrder[]
+  updatedAt: string | null
+  fromCache: boolean
+  total: number
+  error?: string
+}
+
+interface ServicesApiResponse {
+  data: RawService[]
   updatedAt: string | null
   fromCache: boolean
   total: number
@@ -47,15 +56,16 @@ function mapCategory(type: string): string {
 }
 
 function mapSpeed(type: string): Service['speed'] {
-  if (type.includes('instant') || type.includes('fast')) return 'Sangat Cepat'
-  if (type.includes('slow') || type.includes('drip')) return 'Lambat'
+  const t = type.toLowerCase()
+  if (t.includes('drip')) return 'Lambat'
+  if (t.includes('instant') || t.includes('fast')) return 'Sangat Cepat'
+  if (t.includes('slow')) return 'Lambat'
   return 'Cepat'
 }
 
-function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] {
+function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap?: Map<number, RawService>): Service[] {
   if (!orders.length) return []
 
-  // Aggregate by service_id
   const byService = new Map<number, RawOrder[]>()
   for (const o of orders) {
     if (!byService.has(o.service_id)) byService.set(o.service_id, [])
@@ -80,14 +90,11 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] 
     const successRate = parseFloat(((completed / total) * 100).toFixed(1))
     const cancelRate = parseFloat(((cancelled / total) * 100).toFixed(1))
 
-    // AI score: weighted formula (success 55%, cancel penalty 30%, volume 15%)
     const volumeScore = Math.min(total / maxOrders, 1) * 100
     const aiScore = Math.min(100, Math.max(0, Math.round(
       successRate * 0.55 + Math.max(0, 100 - cancelRate * 15) * 0.30 + volumeScore * 0.15
     )))
 
-    // Trend: bandingkan paruh baru vs paruh lama dalam window yang sama
-    // Order tanpa timestamp dianggap "recent" (tidak diketahui kapan)
     const recentCount = svcOrders.filter(o => !o.created_timestamp || o.created_timestamp > midpoint).length
     const prevCount = svcOrders.filter(o => o.created_timestamp && o.created_timestamp <= midpoint).length
 
@@ -99,7 +106,6 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] 
       if (pct > 5) trend = 'up'
       else if (pct < -5) trend = 'down'
     } else if (recentCount > 0) {
-      // Semua order baru (tidak ada di paruh lama) — trending naik
       trend = 'up'
       trendPercent = 100
     }
@@ -107,14 +113,16 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] 
     const avgPrice = total > 0 ? svcOrders.reduce((s, o) => s + (Number(o.charge?.value) || 0), 0) / total : 0
     const { platform, icon } = detectPlatform(sample.service_name, sample.link)
 
-    // isNew: any order created within 7 days
     const sevenDaysAgo = Date.now() / 1000 - 7 * 24 * 3600
     const isNew = svcOrders.some(o => (o.created_timestamp ?? 0) > sevenDaysAgo)
 
+    // Merge with Services API data when available
+    const svc = servicesMap?.get(serviceId)
+
     services.push({
       id: serviceId,
-      name: sample.service_name,
-      category: mapCategory(sample.service_type),
+      name: svc?.name ?? sample.service_name,
+      category: svc?.category ?? mapCategory(sample.service_type),
       platform,
       platformIcon: icon,
       aiScore,
@@ -123,9 +131,9 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] 
       cancelRate,
       trend,
       trendPercent,
-      price: Math.round(avgPrice),
-      minOrder: svcOrders.reduce((m, o) => Math.min(m, Number(o.quantity) || 0), Infinity) || 0,
-      speed: mapSpeed(sample.service_type),
+      price: svc ? Math.round(Number(svc.rate)) : Math.round(avgPrice),
+      minOrder: svc ? Number(svc.min) : (svcOrders.reduce((m, o) => Math.min(m, Number(o.quantity) || 0), Infinity) || 0),
+      speed: mapSpeed(svc?.type ?? sample.service_type),
       quality: aiScore >= 90 ? 'Premium' : aiScore >= 80 ? 'High' : 'Standard',
       isHot: total >= maxOrders * 0.7,
       isNew: isNew || undefined,
@@ -137,13 +145,19 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number): Service[] 
 
 export const useOrders = (period?: Ref<string>) => {
   const rawOrders = ref<RawOrder[]>([])
+  const rawServicesList = ref<RawService[]>([])
   const isLoading = ref(true)
   const fromCache = ref(false)
   const apiError = ref<string | null>(null)
   const updatedAt = ref<string | null>(null)
   const lastUpdate = ref('')
 
-  // Filter raw orders to only those within the selected period window
+  const servicesMap = computed(() => {
+    const map = new Map<number, RawService>()
+    for (const s of rawServicesList.value) map.set(s.service, s)
+    return map
+  })
+
   const periodFiltered = computed(() => {
     if (!period?.value) return rawOrders.value
     const cutoff = Date.now() / 1000 - periodToSeconds(period.value)
@@ -152,10 +166,18 @@ export const useOrders = (period?: Ref<string>) => {
     )
   })
 
-  // Services recompute automatically when rawOrders or period changes
   const services = computed(() =>
-    ordersToServices(periodFiltered.value, periodToSeconds(period?.value ?? '24J'))
+    ordersToServices(periodFiltered.value, periodToSeconds(period?.value ?? '24J'), servicesMap.value)
   )
+
+  const fetchServices = async () => {
+    try {
+      const res = await $fetch<ServicesApiResponse>('/api/services')
+      rawServicesList.value = res.data ?? []
+    } catch {
+      // keep existing list on failure
+    }
+  }
 
   const fetchOrders = async () => {
     try {
@@ -177,11 +199,16 @@ export const useOrders = (period?: Ref<string>) => {
     }
   }
 
+  const resync = async () => {
+    isLoading.value = true
+    await Promise.all([fetchOrders(), fetchServices()])
+  }
+
   onMounted(async () => {
-    await fetchOrders()
-    const timer = setInterval(fetchOrders, 3 * 60 * 1000) // 3 minutes
+    await Promise.all([fetchOrders(), fetchServices()])
+    const timer = setInterval(fetchOrders, 3 * 60 * 1000)
     onUnmounted(() => clearInterval(timer))
   })
 
-  return { services, rawOrders, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders  }
+  return { services, rawOrders, rawServicesList, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders, fetchServices, resync }
 }

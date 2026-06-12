@@ -4,7 +4,8 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     apiBaseUrl: process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com',
-    apiKey: process.env.NUXT_API_KEY || '',
+    apiAdminKey: process.env.NUXT_API_ADMIN_KEY || '',  // Admin API → /adminapi/v2/orders
+    apiV2Key: process.env.NUXT_API_V2_KEY || '',        // User/Reseller API → /api/v2
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
   },
 

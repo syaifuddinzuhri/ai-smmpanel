@@ -42,15 +42,15 @@ export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
   const storage = useStorage('data')
 
-  if (!config.apiKey) {
-    log('WARN', 'API key tidak dikonfigurasi — returning cache')
+  if (!config.apiAdminKey) {
+    log('WARN', 'Admin API key (NUXT_API_ADMIN_KEY) tidak dikonfigurasi — returning cache')
     const cached = await storage.getItem<CacheEntry>('orders:latest')
     return {
       data: cached?.list ?? [],
       updatedAt: cached?.updatedAt ?? null,
       fromCache: true,
       total: cached?.list?.length ?? 0,
-      error: 'API key tidak dikonfigurasi',
+      error: 'Admin API key tidak dikonfigurasi',
     }
   }
 
@@ -59,7 +59,7 @@ export default defineEventHandler(async () => {
 
   try {
     const allOrders: RawOrder[] = []
-    const pageLimit = 200
+    const pageLimit = 1000
     let offset = 0
     let hasMore = true
     let page = 0
@@ -71,7 +71,7 @@ export default defineEventHandler(async () => {
 
       const startTime = Date.now()
       const res = await $fetch<ApiResponse>(url, {
-        headers: { 'Content-Type': 'application/json', 'X-Api-Key': config.apiKey },
+        headers: { 'Content-Type': 'application/json', 'X-Api-Key': String(config.apiAdminKey) },
         timeout: 12000,
       })
       const elapsed = Date.now() - startTime

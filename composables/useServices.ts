@@ -69,11 +69,13 @@ export const useServices = () => {
   const {
     services: liveServices,
     rawOrders,
+    rawServicesList,
     isLoading,
     fromCache,
     apiError,
     lastUpdate,
     fetchOrders,
+    resync,
   } = useOrders(selectedPeriod)
 
   // Fall back to mock data only when the API has returned zero raw orders
@@ -208,7 +210,7 @@ export const useServices = () => {
   watch(liveServices, () => { fetchInsight() }, { deep: false })
 
   return {
-    services, isLoading, fromCache, apiError, fetchOrders,
+    services, rawServicesList, isLoading, fromCache, apiError, fetchOrders, resync,
     selectedPlatform, selectedPeriod, selectedSort,
     searchQuery, platforms, periods, sortOptions, filteredServices,
     stats, topPerformers, riskyServices, trendingServices,

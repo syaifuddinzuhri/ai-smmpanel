@@ -23,21 +23,31 @@
       </div>
     </div>
 
-    <!-- Platform groups -->
+    <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-4">
       <div v-for="i in 3" :key="i" class="card p-5 space-y-3">
         <div class="skeleton w-32 h-4"></div>
-        <div v-for="j in 3" :key="j" class="flex items-center gap-4">
+        <div v-for="j in 4" :key="j" class="flex items-center gap-4">
           <div class="skeleton flex-1 h-3"></div>
-          <div class="skeleton w-12 h-3"></div>
+          <div class="skeleton w-16 h-3"></div>
           <div class="skeleton w-12 h-3"></div>
           <div class="skeleton w-16 h-5 rounded-full"></div>
         </div>
       </div>
     </div>
 
+    <!-- Empty state -->
+    <div v-else-if="!filteredGroups.length" class="card p-12 text-center">
+      <p class="text-4xl mb-3 opacity-30">📦</p>
+      <p class="text-slate-400 text-[14px] font-medium">Tidak ada layanan ditemukan</p>
+      <p class="text-slate-600 text-[12px] mt-1">
+        {{ services.length === 0 ? 'Katalog layanan belum tersedia' : 'Coba ubah filter atau kata kunci' }}
+      </p>
+    </div>
+
+    <!-- Platform groups -->
     <div v-else class="space-y-4">
-      <div v-for="group in platformGroups" :key="group.platform" class="card overflow-hidden">
+      <div v-for="group in filteredGroups" :key="group.platform" class="card overflow-hidden">
         <!-- Platform header -->
         <div class="flex items-center justify-between px-5 py-3.5 border-b border-white/[0.06]">
           <div class="flex items-center gap-2.5">
@@ -48,60 +58,74 @@
             </span>
           </div>
           <div class="flex items-center gap-3 text-[11px]">
-            <span class="text-emerald-400 font-medium">
-              ● {{ group.services.filter(s => s.successRate >= 95).length }} sehat
+            <span v-if="group.services.filter(s => s.refill).length" class="text-emerald-400 font-medium">
+              ● {{ group.services.filter(s => s.refill).length }} refill
             </span>
-            <span v-if="group.services.filter(s => s.successRate < 95).length > 0" class="text-red-400 font-medium">
-              ● {{ group.services.filter(s => s.successRate < 95).length }} berisiko
+            <span v-if="group.services.filter(s => s.cancel).length" class="text-blue-400 font-medium">
+              ● {{ group.services.filter(s => s.cancel).length }} cancel
             </span>
           </div>
         </div>
 
+        <!-- Column headers (desktop) -->
+        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px] gap-3 px-5 py-2 border-b border-white/[0.03]">
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 1000</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Max Order</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-right pr-1">Fitur</span>
+        </div>
+
         <!-- Service rows -->
         <div class="divide-y divide-white/[0.03]">
-          <div v-for="svc in group.services" :key="svc.id"
-            class="grid grid-cols-[1fr_auto] md:grid-cols-[2fr_1fr_1fr_1fr_1fr_auto] items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors">
+          <div v-for="svc in group.services" :key="svc.service"
+            class="grid grid-cols-[1fr_auto] md:grid-cols-[3fr_1fr_1fr_1fr_148px] items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors">
 
-            <!-- Name -->
+            <!-- Name + meta -->
             <div class="min-w-0">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</span>
-                <span v-if="svc.isHot" class="text-[10px] px-1.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-semibold flex-shrink-0">HOT</span>
-                <span v-if="svc.isNew" class="text-[10px] px-1.5 py-0.5 rounded bg-violet-500/10 border border-violet-500/20 text-violet-400 font-semibold flex-shrink-0">NEW</span>
+              <p class="text-slate-200 text-[13px] font-medium leading-snug">{{ svc.name }}</p>
+              <div class="flex items-center gap-2 mt-0.5 flex-wrap">
+                <span class="text-slate-600 text-[11px]">ID: {{ svc.service }}</span>
+                <span class="text-slate-700">·</span>
+                <span class="text-slate-500 text-[11px]">{{ svc.category }}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-medium leading-none">
+                  {{ svc.type }}
+                </span>
               </div>
-              <p class="text-slate-600 text-[11px] mt-0.5">ID: {{ svc.id }} · {{ svc.category }} · Min {{ svc.minOrder.toLocaleString('id-ID') }}</p>
             </div>
 
-            <!-- Desktop cols -->
+            <!-- Harga/1000 -->
             <div class="hidden md:block text-center">
-              <p :class="['text-[13px] font-semibold tabular-nums', svc.successRate >= 98 ? 'text-emerald-400' : svc.successRate >= 95 ? 'text-yellow-400' : 'text-red-400']">
-                {{ svc.successRate }}%
+              <p class="text-indigo-300 text-[13px] font-semibold tabular-nums">
+                {{ Number(svc.rate) > 0 ? 'Rp ' + Number(svc.rate).toLocaleString('id-ID') : '—' }}
               </p>
-              <p class="text-slate-700 text-[10px]">success</p>
+              <p class="text-slate-700 text-[10px]">per 1000</p>
             </div>
 
+            <!-- Min order -->
             <div class="hidden md:block text-center">
-              <p class="text-slate-300 text-[13px] tabular-nums">{{ svc.orderCount.toLocaleString('id-ID') }}</p>
-              <p class="text-slate-700 text-[10px]">orders</p>
+              <p class="text-slate-300 text-[13px] tabular-nums">{{ Number(svc.min).toLocaleString('id-ID') }}</p>
+              <p class="text-slate-700 text-[10px]">minimum</p>
             </div>
 
+            <!-- Max order -->
             <div class="hidden md:block text-center">
-              <p :class="['text-[13px] font-medium tabular-nums', svc.cancelRate <= 1 ? 'text-emerald-400' : svc.cancelRate <= 2 ? 'text-yellow-400' : 'text-red-400']">
-                {{ svc.cancelRate }}%
-              </p>
-              <p class="text-slate-700 text-[10px]">cancel</p>
+              <p class="text-slate-400 text-[13px] tabular-nums">{{ Number(svc.max).toLocaleString('id-ID') }}</p>
+              <p class="text-slate-700 text-[10px]">maksimum</p>
             </div>
 
-            <div class="hidden md:block text-center">
-              <p :class="['text-[11px] font-medium', speedColor(svc.speed)]">{{ svc.speed }}</p>
-              <p class="text-indigo-300 text-[12px] font-semibold mt-0.5">Rp {{ svc.price.toLocaleString('id-ID') }}</p>
-            </div>
-
-            <!-- Status badge -->
-            <div class="flex-shrink-0">
-              <span :class="['inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border', statusStyle(svc.successRate, svc.cancelRate)]">
-                <span class="w-1.5 h-1.5 rounded-full" :class="statusDot(svc.successRate, svc.cancelRate)"></span>
-                {{ statusLabel(svc.successRate, svc.cancelRate) }}
+            <!-- Feature badges + mobile price -->
+            <div class="flex items-center gap-1.5 justify-end">
+              <span class="md:hidden text-indigo-300 text-[12px] font-semibold tabular-nums">
+                Rp&nbsp;{{ Number(svc.rate).toLocaleString('id-ID') }}
+              </span>
+              <span v-if="svc.refill"
+                class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
+                ↻ Refill
+              </span>
+              <span v-if="svc.cancel"
+                class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold whitespace-nowrap">
+                ✕ Cancel
               </span>
             </div>
           </div>
@@ -112,72 +136,90 @@
 </template>
 
 <script setup lang="ts">
-import type { Service } from '~/composables/useServices'
+import type { RawService } from '~/server/api/services.get'
 
 const props = defineProps<{
-  services: Service[]
+  services: RawService[]
   isLoading: boolean
-  stats: { total: number; avgSuccess: string; totalOrders: number; risky: number; trending: number }
+  searchQuery: string
+  selectedPlatform: string
 }>()
 
-const summary = computed(() => [
-  {
-    icon: '🟢', accent: 'bg-emerald-500', labelColor: 'text-emerald-400',
-    label: 'Layanan Sehat', dotColor: 'bg-emerald-400',
-    value: props.services.filter(s => s.successRate >= 95 && s.cancelRate <= 2).length,
-    sub: 'Success ≥95%, Cancel ≤2%', subColor: 'text-emerald-400'
-  },
-  {
-    icon: '⚠️', accent: 'bg-amber-500', labelColor: 'text-amber-400',
-    label: 'Perlu Perhatian', dotColor: 'bg-amber-400',
-    value: props.services.filter(s => s.successRate >= 90 && s.successRate < 95).length,
-    sub: 'Success 90–94%', subColor: 'text-amber-400'
-  },
-  {
-    icon: '🔴', accent: 'bg-red-500', labelColor: 'text-red-400',
-    label: 'Berisiko', dotColor: 'bg-red-400',
-    value: props.stats.risky,
-    sub: 'Cancel >2% atau SR <90%', subColor: 'text-red-400'
-  },
-  {
-    icon: '📦', accent: 'bg-indigo-500', labelColor: 'text-indigo-400',
-    label: 'Total Order', dotColor: 'bg-indigo-400',
-    value: props.stats.totalOrders.toLocaleString('id-ID'),
-    sub: 'Semua platform', subColor: 'text-slate-400'
+const PLATFORM_ORDER = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'Shopee', 'Lainnya']
+
+function detectPlatform(name: string): { platform: string; icon: string } {
+  const n = name.toLowerCase()
+  if (n.includes('instagram')) return { platform: 'Instagram', icon: '📸' }
+  if (n.includes('tiktok') || n.includes('tik tok')) return { platform: 'TikTok', icon: '🎵' }
+  if (n.includes('youtube') || n.includes('you tube')) return { platform: 'YouTube', icon: '▶️' }
+  if (n.includes('facebook') || n.includes('fb ')) return { platform: 'Facebook', icon: '👍' }
+  if (n.includes('twitter') || n.includes('tweet') || n.includes(' x ') || n.includes('twit')) return { platform: 'Twitter/X', icon: '🐦' }
+  if (n.includes('shopee')) return { platform: 'Shopee', icon: '🛍️' }
+  return { platform: 'Lainnya', icon: '🌐' }
+}
+
+const filteredGroups = computed(() => {
+  let list = props.services
+
+  if (props.searchQuery.trim()) {
+    const q = props.searchQuery.toLowerCase()
+    list = list.filter(s =>
+      s.name.toLowerCase().includes(q) ||
+      s.service.toString().includes(q) ||
+      s.category.toLowerCase().includes(q)
+    )
   }
-])
 
-const platformOrder = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'Shopee']
-const platformIcons: Record<string, string> = {
-  Instagram: '📸', TikTok: '🎵', YouTube: '▶️', Facebook: '👍', 'Twitter/X': '🐦', Shopee: '🛍️'
-}
+  const grouped = new Map<string, { platform: string; icon: string; services: RawService[] }>()
+  for (const svc of list) {
+    const { platform, icon } = detectPlatform(svc.name)
+    if (!grouped.has(platform)) grouped.set(platform, { platform, icon, services: [] })
+    grouped.get(platform)!.services.push(svc)
+  }
 
-const platformGroups = computed(() =>
-  platformOrder.map(p => ({
-    platform: p,
-    icon: platformIcons[p],
-    services: props.services.filter(s => s.platform === p)
-  })).filter(g => g.services.length > 0)
-)
+  let groups = PLATFORM_ORDER
+    .map(p => grouped.get(p))
+    .filter((g): g is { platform: string; icon: string; services: RawService[] } => !!g && g.services.length > 0)
 
-const statusStyle = (sr: number, cr: number) => {
-  if (sr >= 98 && cr <= 1) return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-  if (sr >= 95 && cr <= 2) return 'bg-blue-500/10 border-blue-500/20 text-blue-400'
-  if (sr >= 90) return 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-  return 'bg-red-500/10 border-red-500/20 text-red-400'
-}
-const statusDot = (sr: number, cr: number) => {
-  if (sr >= 98 && cr <= 1) return 'bg-emerald-400'
-  if (sr >= 95 && cr <= 2) return 'bg-blue-400'
-  if (sr >= 90) return 'bg-amber-400'
-  return 'bg-red-400'
-}
-const statusLabel = (sr: number, cr: number) => {
-  if (sr >= 98 && cr <= 1) return 'Excellent'
-  if (sr >= 95 && cr <= 2) return 'Normal'
-  if (sr >= 90) return 'Waspada'
-  return 'Berisiko'
-}
-const speedColor = (s: string) =>
-  s === 'Sangat Cepat' ? 'text-emerald-400' : s === 'Cepat' ? 'text-blue-400' : s === 'Sedang' ? 'text-yellow-400' : 'text-red-400'
+  if (props.selectedPlatform !== 'Semua') {
+    groups = groups.filter(g => g.platform === props.selectedPlatform)
+  }
+
+  return groups
+})
+
+const summary = computed(() => {
+  const list = props.services
+  const n = list.length
+  const refillCount = list.filter(s => s.refill).length
+  const cancelCount = list.filter(s => s.cancel).length
+  const categoryCount = new Set(list.map(s => s.category)).size
+
+  return [
+    {
+      icon: '📦', accent: 'bg-indigo-500', labelColor: 'text-indigo-400',
+      label: 'Total Layanan', dotColor: 'bg-indigo-400',
+      value: n.toLocaleString('id-ID'),
+      sub: 'Dari katalog aktif', subColor: 'text-slate-400',
+    },
+    {
+      icon: '🏷️', accent: 'bg-violet-500', labelColor: 'text-violet-400',
+      label: 'Kategori', dotColor: 'bg-violet-400',
+      value: categoryCount.toLocaleString('id-ID'),
+      sub: 'Jenis layanan unik', subColor: 'text-violet-400',
+    },
+    {
+      icon: '↻', accent: 'bg-emerald-500', labelColor: 'text-emerald-400',
+      label: 'Support Refill', dotColor: 'bg-emerald-400',
+      value: refillCount.toLocaleString('id-ID'),
+      sub: n ? `${Math.round((refillCount / n) * 100)}% dari total` : '—', subColor: 'text-emerald-400',
+    },
+    {
+      icon: '✕', accent: 'bg-blue-500', labelColor: 'text-blue-400',
+      label: 'Support Cancel', dotColor: 'bg-blue-400',
+      value: cancelCount.toLocaleString('id-ID'),
+      sub: n ? `${Math.round((cancelCount / n) * 100)}% dari total` : '—', subColor: 'text-blue-400',
+    },
+  ]
+})
 </script>
