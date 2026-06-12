@@ -99,7 +99,7 @@ function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[]
       else if (pct < -1) trend = 'down'
     }
 
-    const avgPrice = svcOrders.reduce((s, o) => s + (Number(o.charge?.value) || 0), 0) / total
+    const avgPrice = total > 0 ? svcOrders.reduce((s, o) => s + (Number(o.charge?.value) || 0), 0) / total : 0
     const { platform, icon } = detectPlatform(sample.service_name, sample.link)
 
     // isNew: any order created within 7 days
@@ -119,7 +119,7 @@ function ordersToServices(orders: RawOrder[], prevOrders: RawOrder[]): Service[]
       trend,
       trendPercent,
       price: Math.round(avgPrice),
-      minOrder: Math.min(...svcOrders.map(o => Number(o.quantity) || 0)),
+      minOrder: svcOrders.reduce((m, o) => Math.min(m, Number(o.quantity) || 0), Infinity) || 0,
       speed: mapSpeed(sample.service_type),
       quality: aiScore >= 90 ? 'Premium' : aiScore >= 80 ? 'High' : 'Standard',
       isHot: total >= maxOrders * 0.7,

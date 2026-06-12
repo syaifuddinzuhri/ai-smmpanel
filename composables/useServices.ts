@@ -133,10 +133,11 @@ export const useServices = () => {
 
   const stats = computed(() => {
     const all = services.value
+    const n = all.length || 1
     return {
       total: all.length,
-      avgScore: Math.round(all.reduce((s, x) => s + x.aiScore, 0) / all.length),
-      avgSuccess: (all.reduce((s, x) => s + x.successRate, 0) / all.length).toFixed(1),
+      avgScore: all.length ? Math.round(all.reduce((s, x) => s + x.aiScore, 0) / n) : 0,
+      avgSuccess: all.length ? (all.reduce((s, x) => s + x.successRate, 0) / n).toFixed(1) : '0.0',
       totalOrders: all.reduce((s, x) => s + x.orderCount, 0),
       risky: all.filter(s => s.cancelRate > 2 || s.successRate < 95).length,
       trending: all.filter(s => s.trend === 'up' && s.trendPercent > 5).length,

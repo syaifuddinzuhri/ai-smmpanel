@@ -9,8 +9,12 @@ export default defineNuxtConfig({
   },
 
   nitro: {
+    preset: process.env.NETLIFY ? 'netlify' : undefined,
     storage: {
-      data: { driver: 'fs', base: './.data/kv' },
+      // fs driver tidak tersedia di Netlify serverless — fallback ke memory
+      data: process.env.NETLIFY
+        ? { driver: 'memory' }
+        : { driver: 'fs', base: './.data/kv' },
     },
   },
   modules: ['@nuxtjs/tailwindcss'],
