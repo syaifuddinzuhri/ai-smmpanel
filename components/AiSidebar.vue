@@ -139,7 +139,7 @@
     <!-- Footer -->
     <div class="px-4 py-2.5 border-t border-white/[0.06] flex items-center justify-between">
       <span class="text-[10px] text-slate-600">Multi-Factor Scoring Engine v1.0</span>
-      <span class="text-[10px] text-indigo-500/60">SmmPanel AI</span>
+      <span class="text-[10px] text-indigo-500/60">SmmBuzzer AI</span>
     </div>
   </div>
 </template>

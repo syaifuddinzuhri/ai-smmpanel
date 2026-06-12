@@ -68,18 +68,19 @@
         </div>
 
         <!-- Column headers (desktop) -->
-        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px] gap-3 px-5 py-2 border-b border-white/[0.03]">
+        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px_72px] gap-3 px-5 py-2 border-b border-white/[0.03]">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 1000</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Max Order</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-right pr-1">Fitur</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Aksi</span>
         </div>
 
         <!-- Service rows -->
         <div class="divide-y divide-white/[0.03]">
           <div v-for="svc in group.services" :key="svc.service"
-            class="grid grid-cols-[1fr_auto] md:grid-cols-[3fr_1fr_1fr_1fr_148px] items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors">
+            class="grid grid-cols-[1fr_auto] md:grid-cols-[3fr_1fr_1fr_1fr_148px_72px] items-center gap-3 px-5 py-3 hover:bg-white/[0.02] transition-colors">
 
             <!-- Name + meta -->
             <div class="min-w-0">
@@ -114,9 +115,9 @@
               <p class="text-slate-700 text-[10px]">maksimum</p>
             </div>
 
-            <!-- Feature badges + mobile price -->
+            <!-- Feature badges + mobile price + mobile Beli -->
             <div class="flex items-center gap-1.5 justify-end">
-              <span class="md:hidden text-indigo-300 text-[12px] font-semibold tabular-nums">
+              <span class="md:hidden text-indigo-300 text-[11px] font-semibold tabular-nums">
                 Rp&nbsp;{{ Number(svc.rate).toLocaleString('id-ID') }}
               </span>
               <span v-if="svc.refill"
@@ -127,6 +128,25 @@
                 class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold whitespace-nowrap">
                 ✕ Cancel
               </span>
+              <a
+                :href="`${panelUrl}?service=${svc.service}`"
+                target="_blank" rel="noopener noreferrer"
+                class="md:hidden inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150"
+              >Beli</a>
+            </div>
+
+            <!-- Beli desktop -->
+            <div class="hidden md:flex justify-center">
+              <a
+                :href="`${panelUrl}?service=${svc.service}`"
+                target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap shadow-sm shadow-indigo-500/20"
+              >
+                Beli
+                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </a>
             </div>
           </div>
         </div>
@@ -137,6 +157,8 @@
 
 <script setup lang="ts">
 import type { RawService } from '~/server/api/services.get'
+
+const panelUrl = useRuntimeConfig().public.panelUrl
 
 const props = defineProps<{
   services: RawService[]

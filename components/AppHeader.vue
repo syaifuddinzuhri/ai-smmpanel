@@ -13,7 +13,7 @@
               :class="isLoading ? 'bg-amber-400' : 'bg-emerald-400'"></div>
           </div>
           <div class="hidden sm:block">
-            <p class="text-white text-[14px] font-bold leading-none">SmmPanel</p>
+            <p class="text-white text-[14px] font-bold leading-none">SmmBuzzer</p>
             <p class="text-indigo-400 text-[10px] font-medium leading-none mt-0.5">AI Dashboard</p>
           </div>
         </div>

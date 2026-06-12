@@ -29,7 +29,7 @@
         <div class="absolute inset-2 border-2 border-transparent border-t-violet-500 rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 0.8s"></div>
       </div>
       <div class="text-center space-y-1.5">
-        <p class="text-slate-300 text-[13px] font-medium">Mengambil data dari SmmPanel...</p>
+        <p class="text-slate-300 text-[13px] font-medium">Mengambil data dari SmmBuzzer...</p>
         <p class="text-slate-600 text-[11px]">Fetching services &amp; order statistics</p>
         <p class="text-slate-700 text-[11px]">Proses ini memakan waktu 10–30 detik pada permintaan pertama.</p>
         <p class="text-indigo-400/70 text-[11px] font-medium mt-1">Permintaan berikutnya akan langsung tampil (cached ✓)</p>
@@ -55,6 +55,7 @@
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Cancel</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Trend</th>
             <th class="text-right px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Harga</th>
+            <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Aksi</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/[0.03]">
@@ -137,6 +138,20 @@
             <td class="px-3 py-3 text-right">
               <span class="text-[13px] font-semibold text-indigo-300 tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
             </td>
+
+            <!-- Beli -->
+            <td class="px-3 py-3 text-center">
+              <a
+                :href="`${panelUrl}?service=${svc.id}`"
+                target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap shadow-sm shadow-indigo-500/20"
+              >
+                Beli
+                <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                </svg>
+              </a>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -160,7 +175,7 @@
             <p class="text-slate-600 text-[11px]">ID: {{ svc.id }} · {{ svc.category }}</p>
           </div>
         </div>
-        <div class="grid grid-cols-4 gap-2">
+        <div class="grid grid-cols-4 gap-2 mb-2.5">
           <div class="bg-white/[0.03] rounded-lg p-2 text-center">
             <p :class="['text-[13px] font-bold', scoreColor(svc.aiScore)]">{{ svc.aiScore }}</p>
             <p class="text-slate-600 text-[10px]">Score</p>
@@ -180,6 +195,19 @@
             <p class="text-slate-600 text-[10px]">Trend</p>
           </div>
         </div>
+        <div class="flex items-center justify-between">
+          <span class="text-indigo-300 text-[13px] font-semibold tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
+          <a
+            :href="`${panelUrl}?service=${svc.id}`"
+            target="_blank" rel="noopener noreferrer"
+            class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[12px] font-semibold transition-all duration-150 shadow-sm shadow-indigo-500/20"
+          >
+            Beli
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+          </a>
+        </div>
       </div>
     </div>
   </div>
@@ -196,6 +224,8 @@ defineProps<{
   selectedSort: string
 }>()
 defineEmits(['update:selectedSort'])
+
+const panelUrl = useRuntimeConfig().public.panelUrl
 
 const scoreColor = (s: number) => s >= 95 ? 'text-emerald-400' : s >= 85 ? 'text-violet-400' : s >= 75 ? 'text-yellow-400' : 'text-red-400'
 const speedColor = (s: string) => s === 'Sangat Cepat' ? 'text-emerald-400' : s === 'Cepat' ? 'text-blue-400' : s === 'Sedang' ? 'text-yellow-400' : 'text-red-400'
