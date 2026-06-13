@@ -24,20 +24,20 @@
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
 
       <!-- Tabs -->
-      <div class="flex items-center gap-1 rounded-xl p-1 overflow-x-auto scrollbar-hide max-w-full mb-3" :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }">
+      <div class="flex items-start gap-1 rounded-xl p-1 max-w-full mb-3" :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }">
         <button
           v-for="tab in mainTabs"
           :key="tab.key"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0',
+            'flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 flex-1 sm:flex-none text-center sm:text-left',
             activeTab === tab.key
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
               : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-[var(--row-hover)]'
           ]"
           @click="activeTab = tab.key"
         >
-          <Icon :name="tab.icon" class="w-4 h-4 flex-shrink-0" />
-          <span>{{ tab.label }}</span>
+          <Icon :name="tab.icon" class="w-4 h-4 flex-shrink-0 sm:mt-0.5" />
+          <span class="line-clamp-2 leading-snug text-[11px] sm:text-[13px]">{{ tab.label }}</span>
         </button>
       </div>
 

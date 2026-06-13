@@ -302,33 +302,40 @@
           <div
             v-for="(s, i) in statusCards"
             :key="s.label"
-            :class="['card p-4 flex flex-col gap-3', i < 2 ? 'col-span-3 lg:col-span-1' : 'col-span-2 lg:col-span-1']"
+            :class="[
+              'relative overflow-hidden rounded-xl p-3.5 lg:p-4 transition-all hover:scale-[1.01]',
+              i < 2 ? 'col-span-3 lg:col-span-1' : 'col-span-2 lg:col-span-1'
+            ]"
+            :style="{ background: 'var(--bg-a70)', border: '1px solid var(--border)' }"
           >
-            <div
-              :class="[
-                'w-9 h-9 rounded-xl p-2 flex items-center justify-center flex-shrink-0',
-                s.bg
-              ]"
-            >
-              <Icon :name="s.icon" :class="['w-4.5 h-4.5', s.color]" />
-            </div>
-            <div>
-              <p
-                :class="[
-                  'text-[26px] font-black leading-none tabular-nums',
-                  s.color
-                ]"
-              >
-                {{ s.count.toLocaleString("id-ID") }}
-              </p>
-              <div class="flex items-center justify-between">
-                <p class="text-slate-600 text-[11px] mt-0.5">
-                  {{ pct(s.count) }}%
-                </p>
-                <p class="text-slate-400 text-[12px] font-medium mt-1">
-                  {{ s.label }}
-                </p>
+            <!-- Top accent bar -->
+            <div :class="['absolute top-0 left-0 right-0 h-0.5', s.barColor]"></div>
+
+            <!-- Watermark icon -->
+            <Icon :name="s.icon" :class="['absolute bottom-2 right-2 w-10 h-10 opacity-[0.06]', s.color]" />
+
+            <!-- Icon + percentage -->
+            <div class="flex items-center justify-between mb-2.5">
+              <div :class="['w-7 h-7 rounded-lg flex items-center justify-center', s.bg]">
+                <Icon :name="s.icon" :class="['w-3.5 h-3.5', s.color]" />
               </div>
+              <span :class="['text-[10px] font-bold px-1.5 py-0.5 rounded-full', s.bg, s.color]">
+                {{ pct(s.count) }}%
+              </span>
+            </div>
+
+            <!-- Count -->
+            <p :class="['text-[24px] lg:text-[28px] font-black leading-none tabular-nums mb-0.5', s.color]">
+              {{ s.count.toLocaleString("id-ID") }}
+            </p>
+            <p class="text-slate-500 dark:text-slate-600 text-[11px] font-medium truncate">{{ s.label }}</p>
+
+            <!-- Progress bar -->
+            <div class="mt-3 h-1 rounded-full bg-slate-200 dark:bg-white/[0.06] overflow-hidden">
+              <div
+                :class="['h-full rounded-full transition-all duration-700', s.barColor]"
+                :style="{ width: pct(s.count) + '%' }"
+              ></div>
             </div>
           </div>
         </div>
@@ -724,41 +731,11 @@ const platformIcon = computed(() => {
 const statusCards = computed(() => {
   if (!data.value) return [];
   return [
-    {
-      label: "Completed",
-      count: data.value.completed,
-      icon: "heroicons:check",
-      bg: "bg-emerald-500/10",
-      color: "text-emerald-400"
-    },
-    {
-      label: "Partial",
-      count: data.value.partial,
-      icon: "heroicons:clock",
-      bg: "bg-yellow-500/10",
-      color: "text-yellow-400"
-    },
-    {
-      label: "Processing",
-      count: data.value.processing,
-      icon: "heroicons:arrow-path",
-      bg: "bg-blue-500/10",
-      color: "text-blue-400"
-    },
-    {
-      label: "In Progress",
-      count: data.value.inProgress,
-      icon: "heroicons:play-circle",
-      bg: "bg-violet-500/10",
-      color: "text-violet-400"
-    },
-    {
-      label: "Canceled",
-      count: data.value.canceled,
-      icon: "heroicons:x-mark",
-      bg: "bg-red-500/10",
-      color: "text-red-400"
-    }
+    { label: "Completed",  count: data.value.completed,  icon: "heroicons:check-circle", bg: "bg-emerald-500/10", color: "text-emerald-400", barColor: "bg-emerald-500" },
+    { label: "Partial",    count: data.value.partial,    icon: "heroicons:clock",        bg: "bg-yellow-500/10", color: "text-yellow-400",  barColor: "bg-yellow-500"  },
+    { label: "Processing", count: data.value.processing, icon: "heroicons:arrow-path",   bg: "bg-blue-500/10",   color: "text-blue-400",    barColor: "bg-blue-500"    },
+    { label: "In Progress",count: data.value.inProgress, icon: "heroicons:play-circle",  bg: "bg-violet-500/10", color: "text-violet-400",  barColor: "bg-violet-500"  },
+    { label: "Canceled",   count: data.value.canceled,   icon: "heroicons:x-circle",     bg: "bg-red-500/10",    color: "text-red-400",     barColor: "bg-red-500"     }
   ];
 });
 

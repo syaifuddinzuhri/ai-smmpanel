@@ -50,19 +50,19 @@
     <div v-else class="space-y-4">
       <div v-for="group in filteredGroups" :key="group.platform" class="card overflow-hidden">
         <!-- Platform header -->
-        <div class="flex items-center justify-between px-5 py-3.5" :style="{ borderBottom: '1px solid var(--border)' }">
-          <div class="flex items-center gap-2.5">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 md:px-5 py-3" :style="{ borderBottom: '1px solid var(--border)' }">
+          <div class="flex items-center gap-2 flex-shrink-0">
             <Icon :name="group.icon" class="w-5 h-5 flex-shrink-0" />
             <span class="text-slate-900 dark:text-white font-semibold text-[14px]">{{ group.platform }}</span>
             <span class="text-[11px] px-2 py-0.5 rounded-full text-slate-500" :style="{ background: 'var(--bg-input)', border: '1px solid var(--border-str)' }">
               {{ group.services.length }} layanan
             </span>
           </div>
-          <div class="flex items-center gap-3 text-[11px]">
-            <span v-if="group.services.filter(s => s.refill).length" class="text-emerald-400 font-medium">
+          <div class="flex items-center gap-2.5 text-[11px] w-full md:w-auto md:ml-auto pl-7 md:pl-0">
+            <span v-if="group.services.filter(s => s.refill).length" class="text-emerald-400 font-medium whitespace-nowrap">
               ● {{ group.services.filter(s => s.refill).length }} refill
             </span>
-            <span v-if="group.services.filter(s => s.cancel).length" class="text-blue-400 font-medium">
+            <span v-if="group.services.filter(s => s.cancel).length" class="text-blue-400 font-medium whitespace-nowrap">
               ● {{ group.services.filter(s => s.cancel).length }} cancel
             </span>
           </div>
@@ -81,10 +81,10 @@
         <!-- Service rows -->
         <div class="divide-y divide-slate-100 dark:divide-white/[0.03]">
           <div v-for="svc in group.services" :key="svc.service"
-            class="grid grid-cols-[1fr_auto] md:grid-cols-[3fr_1fr_1fr_1fr_148px_140px] items-center gap-3 px-5 py-3 transition-colors hover:bg-[var(--row-hover)]">
+            class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_148px_140px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
 
             <!-- Name + meta -->
-            <div class="min-w-0">
+            <div class="min-w-0 mb-2 md:mb-0">
               <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium leading-snug">{{ svc.name }}</p>
               <div class="flex items-center gap-2 mt-0.5 flex-wrap">
                 <span class="text-slate-600 text-[11px]">ID: {{ svc.service }}</span>
@@ -116,29 +116,31 @@
               <p class="text-slate-700 text-[10px]">maksimum</p>
             </div>
 
-            <!-- Feature badges + mobile price + mobile Beli -->
-            <div class="flex items-center gap-1.5 justify-end">
-              <span class="md:hidden text-indigo-400 dark:text-indigo-300 text-[11px] font-semibold tabular-nums">
-                Rp&nbsp;{{ Number(svc.rate).toLocaleString('id-ID') }}
+            <!-- Mobile bottom row: harga + badge + aksi -->
+            <div class="flex md:contents items-center gap-2">
+              <span class="md:hidden text-indigo-400 dark:text-indigo-300 text-[12px] font-bold tabular-nums">
+                Rp&nbsp;{{ Number(svc.rate).toLocaleString('id-ID') }}<span class="text-slate-500 font-normal text-[10px]">/1000</span>
               </span>
-              <span v-if="svc.refill"
-                class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
-                ↻ Refill
-              </span>
-              <span v-if="svc.cancel"
-                class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold whitespace-nowrap">
-                ✕ Cancel
-              </span>
+              <div class="flex items-center gap-1.5 flex-1 md:justify-end">
+                <span v-if="svc.refill"
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
+                  ↻ Refill
+                </span>
+                <span v-if="svc.cancel"
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 font-semibold whitespace-nowrap">
+                  ✕ Cancel
+                </span>
+              </div>
               <!-- Mobile: Beli + Detail -->
-              <div class="md:hidden flex items-center gap-1.5">
+              <div class="md:hidden flex items-center gap-1.5 ml-auto">
                 <a
                   :href="`${panelUrl}?service=${svc.service}`"
                   target="_blank" rel="noopener noreferrer"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150"
                 >Beli</a>
                 <NuxtLink
                   :to="{ path: `/service/${svc.service}`, query: props.selectedPeriod ? { period: props.selectedPeriod } : {} }"
-                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-slate-600 dark:text-slate-300 text-[11px] font-semibold transition-all duration-150"
+                  class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 text-[11px] font-semibold transition-all duration-150"
                   :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
                 >Detail</NuxtLink>
               </div>
