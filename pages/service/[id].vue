@@ -340,6 +340,44 @@
           </div>
         </div>
 
+        <!-- Heatmap jam aktif -->
+        <div class="card p-5 mb-4" v-if="data.orders.length > 0">
+          <div class="flex items-center gap-2 mb-4">
+            <div class="w-1.5 h-5 rounded bg-gradient-to-b from-indigo-500 to-violet-600"></div>
+            <span class="text-[14px] font-bold text-slate-900 dark:text-white">Heatmap Jam Aktif</span>
+            <span class="text-[11px] text-slate-500 ml-1">Order per jam &amp; hari dalam seminggu</span>
+          </div>
+          <div class="overflow-x-auto">
+            <div class="min-w-[560px]">
+              <!-- Hour axis -->
+              <div class="flex items-center mb-1 pl-10">
+                <div v-for="h in 24" :key="h" class="flex-1 text-center text-[9px] text-slate-500 leading-none">
+                  {{ h - 1 }}
+                </div>
+              </div>
+              <!-- Rows -->
+              <div v-for="(day, di) in heatmapDays" :key="di" class="flex items-center mb-0.5">
+                <span class="w-10 text-[10px] text-slate-500 flex-shrink-0">{{ day }}</span>
+                <div
+                  v-for="h in 24"
+                  :key="h"
+                  class="flex-1 h-[18px] rounded-sm mx-[1px] cursor-default transition-opacity hover:opacity-80"
+                  :title="`${day} ${h-1}:00 — ${heatmap.counts[di][h-1]} order`"
+                  :style="heatmapCellStyle(heatmap.counts[di][h-1], heatmap.max)"
+                ></div>
+              </div>
+              <!-- Legend -->
+              <div class="flex items-center gap-2 mt-3 justify-end">
+                <span class="text-[10px] text-slate-600">Sedikit</span>
+                <div class="flex gap-0.5">
+                  <div v-for="l in 5" :key="l" class="w-4 h-4 rounded-sm" :style="{ background: `rgba(99,102,241,${l * 0.18})` }"></div>
+                </div>
+                <span class="text-[10px] text-slate-600">Banyak</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Transaction history -->
         <div class="card overflow-hidden">
           <!-- Header + filter tabs -->
@@ -347,7 +385,7 @@
             class="px-5 pt-5 pb-3"
             :style="{ borderBottom: '1px solid var(--border)' }"
           >
-            <div class="flex items-center justify-between gap-3 mb-4">
+            <div class="flex items-center justify-between gap-3 mb-3">
               <div class="flex items-center gap-2">
                 <div
                   class="w-1.5 h-5 rounded bg-gradient-to-b from-indigo-500 to-violet-600"
@@ -360,6 +398,25 @@
               <span class="text-[11px] text-slate-500"
                 >{{ filteredOrders.length }} transaksi</span
               >
+            </div>
+            <!-- Search by link/ID -->
+            <div class="relative mb-3">
+              <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+              <input
+                v-model="linkSearch"
+                type="text"
+                placeholder="Cari link target atau ID order..."
+                class="w-full rounded-xl py-2 pl-9 pr-8 text-[12px] text-slate-700 dark:text-slate-200 outline-none transition-all focus:border-indigo-500/40 placeholder:text-slate-400 dark:placeholder:text-slate-600"
+                :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
+                @input="currentPage = 1"
+              />
+              <button
+                v-if="linkSearch"
+                class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+                @click="linkSearch = ''; currentPage = 1"
+              >
+                <Icon name="heroicons:x-mark" class="w-3.5 h-3.5" />
+              </button>
             </div>
             <!-- Status filter tabs -->
             <div class="flex items-center gap-1 overflow-x-auto scrollbar-hide">
@@ -670,6 +727,7 @@ const period = ref((route.query.period as string) ?? "7 Hari");
 // Deklarasi lebih awal agar bisa direset di watch
 const activeFilter = ref("all");
 const currentPage = ref(1);
+const linkSearch = ref("");
 
 const { data, pending, error, refresh } = await useFetch<ServiceOrderStats>(
   "/api/service-orders",
@@ -682,6 +740,7 @@ const { data, pending, error, refresh } = await useFetch<ServiceOrderStats>(
 watch(period, () => {
   activeFilter.value = "all";
   currentPage.value = 1;
+  linkSearch.value = "";
   refresh();
 });
 
@@ -754,15 +813,29 @@ const statusFilters = computed(() => {
 
 const filteredOrders = computed(() => {
   if (!data.value) return [];
-  if (activeFilter.value === "all") return data.value.orders;
-  return data.value.orders.filter((o) => {
-    const s = o.status.toLowerCase().replace("_", "");
-    if (activeFilter.value === "canceled")
-      return s === "canceled" || s === "cancelled";
-    if (activeFilter.value === "inprogress")
-      return s === "inprogress" || s === "in_progress";
-    return s === activeFilter.value;
-  });
+  let list = data.value.orders;
+
+  if (activeFilter.value !== "all") {
+    list = list.filter((o) => {
+      const s = o.status.toLowerCase().replace("_", "");
+      if (activeFilter.value === "canceled")
+        return s === "canceled" || s === "cancelled";
+      if (activeFilter.value === "inprogress")
+        return s === "inprogress" || s === "in_progress";
+      return s === activeFilter.value;
+    });
+  }
+
+  const q = linkSearch.value.trim().toLowerCase();
+  if (q) {
+    list = list.filter(
+      (o) =>
+        (o.link ?? "").toLowerCase().includes(q) ||
+        String(o.id).includes(q)
+    );
+  }
+
+  return list;
 });
 
 // Pagination
@@ -866,5 +939,26 @@ function formatTime(iso: string) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+// Heatmap
+const heatmapDays = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+
+const heatmap = computed(() => {
+  const counts: number[][] = Array.from({ length: 7 }, () => new Array(24).fill(0))
+  if (!data.value?.orders.length) return { counts, max: 1 }
+  for (const order of data.value.orders) {
+    if (!order.created_timestamp) continue
+    const d = new Date(order.created_timestamp * 1000)
+    counts[d.getDay()][d.getHours()]++
+  }
+  const max = Math.max(...counts.flat(), 1)
+  return { counts, max }
+})
+
+function heatmapCellStyle(count: number, max: number) {
+  if (count === 0) return { background: 'var(--bg-subtle)' }
+  const intensity = count / max
+  return { background: `rgba(99,102,241,${Math.max(0.1, intensity * 0.85)})` }
 }
 </script>

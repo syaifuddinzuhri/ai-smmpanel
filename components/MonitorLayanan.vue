@@ -41,6 +41,21 @@
 
       <div class="w-px h-4 bg-slate-300 dark:bg-white/10 flex-shrink-0"></div>
 
+      <!-- Favorit toggle -->
+      <button
+        :class="[
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+          onlyWatchlist ? 'bg-amber-500/15 border-amber-500/30 text-amber-400' : 'border-transparent text-slate-500 hover:bg-[var(--row-hover)]'
+        ]"
+        @click="onlyWatchlist = !onlyWatchlist"
+      >
+        <Icon name="heroicons:star" class="w-3 h-3" />
+        Favorit
+        <span v-if="watchlistCount > 0" :class="['text-[10px] font-bold px-1.5 py-0.5 rounded-full', onlyWatchlist ? 'bg-amber-500/30 text-amber-300' : 'bg-slate-200 dark:bg-white/10 text-slate-500']">{{ watchlistCount }}</span>
+      </button>
+
+      <div class="w-px h-4 bg-slate-300 dark:bg-white/10 flex-shrink-0"></div>
+
       <!-- Refill / Cancel toggles -->
       <button
         :class="[
@@ -65,9 +80,9 @@
 
       <!-- Reset -->
       <button
-        v-if="onlyRefill || onlyCancel || selectedSort"
+        v-if="onlyRefill || onlyCancel || onlyWatchlist || selectedSort"
         class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] text-slate-500 hover:text-red-400 transition-colors"
-        @click="onlyRefill = false; onlyCancel = false; selectedSort = ''"
+        @click="onlyRefill = false; onlyCancel = false; onlyWatchlist = false; selectedSort = ''"
       >
         <Icon name="heroicons:x-mark" class="w-3 h-3" />
         Reset
@@ -181,8 +196,15 @@
                   ✕ Cancel
                 </span>
               </div>
-              <!-- Mobile: Beli + Detail -->
+              <!-- Mobile: Favorit + Beli + Detail -->
               <div class="md:hidden flex items-center gap-1.5 ml-auto">
+                <button
+                  :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0', isWatched(svc.service) ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400']"
+                  :style="{ background: isWatched(svc.service) ? 'rgba(245,158,11,0.18)' : 'var(--bg-input)', border: `1px solid ${isWatched(svc.service) ? 'rgba(245,158,11,0.3)' : 'var(--border)'}` }"
+                  @click.prevent="toggleWatch(svc.service)"
+                >
+                  <Icon :name="isWatched(svc.service) ? 'heroicons:star-solid' : 'heroicons:star'" class="w-3.5 h-3.5" />
+                </button>
                 <a
                   :href="`${panelUrl}?service=${svc.service}`"
                   target="_blank" rel="noopener noreferrer"
@@ -196,8 +218,15 @@
               </div>
             </div>
 
-            <!-- Desktop: Beli + Detail -->
+            <!-- Desktop: Favorit + Beli + Detail -->
             <div class="hidden md:flex items-center justify-center gap-1.5">
+              <button
+                :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0', isWatched(svc.service) ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400']"
+                :style="{ background: isWatched(svc.service) ? 'rgba(245,158,11,0.18)' : 'var(--bg-input)', border: `1px solid ${isWatched(svc.service) ? 'rgba(245,158,11,0.3)' : 'var(--border)'}` }"
+                @click.prevent="toggleWatch(svc.service)"
+              >
+                <Icon :name="isWatched(svc.service) ? 'heroicons:star' : 'heroicons:star'" class="w-3.5 h-3.5" />
+              </button>
               <a
                 :href="`${panelUrl}?service=${svc.service}`"
                 target="_blank" rel="noopener noreferrer"
@@ -235,8 +264,11 @@ const props = defineProps<{
   selectedPeriod?: string
 }>()
 
+const { toggle: toggleWatch, isWatched, count: watchlistCount } = useWatchlist()
+
 const onlyRefill = ref(false)
 const onlyCancel = ref(false)
+const onlyWatchlist = ref(false)
 const selectedSort = ref('')
 
 const sortOptions = [
@@ -299,6 +331,7 @@ const filteredGroups = computed(() => {
 
   if (onlyRefill.value) list = list.filter(s => s.refill)
   if (onlyCancel.value) list = list.filter(s => s.cancel)
+  if (onlyWatchlist.value) list = list.filter(s => isWatched(s.service))
 
   const grouped = new Map<string, { platform: string; icon: string; services: RawService[] }>()
   for (const svc of list) {
