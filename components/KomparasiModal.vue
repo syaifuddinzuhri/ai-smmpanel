@@ -237,6 +237,9 @@ const props = defineProps<{
 
 defineEmits<{ close: [] }>()
 
+onMounted(() => { document.body.style.overflow = 'hidden' })
+onUnmounted(() => { document.body.style.overflow = '' })
+
 const selected = computed(() =>
   props.ids
     .map(id => props.allServices.find(s => s.service === id))
