@@ -6,7 +6,7 @@
 
       <!-- Modal -->
       <div
-        class="relative w-full sm:max-w-[860px] max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#111827]"
+        class="relative w-full sm:max-w-[860px] max-h-[80vh] flex flex-col rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#111827]"
         :style="{ border: '1px solid var(--border)' }"
       >
         <!-- Header -->
