@@ -376,8 +376,8 @@ const sortOptions = [
   { value: 'min_desc',    label: 'Min Order ↓' },
   { value: 'max_asc',     label: 'Max Order ↑' },
   { value: 'max_desc',    label: 'Max Order ↓' },
-  { value: 'orders_desc', label: 'Order ↓ (Terbanyak)' },
-  { value: 'orders_asc',  label: 'Order ↑ (Tersedikit)' },
+  { value: 'orders_desc', label: 'Order ↓' },
+  { value: 'orders_asc',  label: 'Order ↑' },
 ]
 
 function sortServices(list: RawService[]): RawService[] {
