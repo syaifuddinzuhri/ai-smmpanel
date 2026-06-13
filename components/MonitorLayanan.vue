@@ -77,12 +77,22 @@
         <Icon name="heroicons:x-mark" class="w-3 h-3" />
         Cancel
       </button>
+      <button
+        :class="[
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+          onlySehat ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'border-transparent text-slate-500 hover:bg-[var(--row-hover)]'
+        ]"
+        @click="onlySehat = !onlySehat"
+      >
+        <Icon name="heroicons:heart" class="w-3 h-3" />
+        Sehat
+      </button>
 
       <!-- Reset -->
       <button
-        v-if="onlyRefill || onlyCancel || onlyWatchlist || selectedSort"
+        v-if="onlyRefill || onlyCancel || onlyWatchlist || onlySehat || selectedSort"
         class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] text-slate-500 hover:text-red-400 transition-colors"
-        @click="onlyRefill = false; onlyCancel = false; onlyWatchlist = false; selectedSort = ''"
+        @click="onlyRefill = false; onlyCancel = false; onlyWatchlist = false; onlySehat = false; selectedSort = ''"
       >
         <Icon name="heroicons:x-mark" class="w-3 h-3" />
         Reset
@@ -134,11 +144,13 @@
         </div>
 
         <!-- Column headers (desktop) -->
-        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px_180px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
+        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_80px_110px_148px_180px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 1000</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Max Order</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Orders</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Kondisi</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-right pr-1">Fitur</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Aksi</span>
         </div>
@@ -146,7 +158,7 @@
         <!-- Service rows -->
         <div class="divide-y divide-slate-100 dark:divide-white/[0.03]">
           <div v-for="svc in group.services" :key="svc.service"
-            class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_148px_180px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
+            class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_80px_110px_148px_180px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
 
             <!-- Name + meta -->
             <div class="min-w-0 mb-2 md:mb-0">
@@ -179,6 +191,45 @@
             <div class="hidden md:block text-center">
               <p class="text-slate-400 text-[13px] tabular-nums">{{ Number(svc.max).toLocaleString('id-ID') }}</p>
               <p class="text-slate-700 text-[10px]">maksimum</p>
+            </div>
+
+            <!-- Total Orders -->
+            <div class="hidden md:block text-center">
+              <p class="text-slate-700 dark:text-slate-300 text-[13px] font-semibold tabular-nums">
+                {{ svcStats(svc.service).total > 0 ? svcStats(svc.service).total.toLocaleString('id-ID') : '—' }}
+              </p>
+              <p class="text-slate-600 text-[10px]">transaksi</p>
+            </div>
+
+            <!-- Kondisi -->
+            <div class="hidden md:flex items-center justify-center">
+              <span v-if="svcStats(svc.service).total === 0" class="text-slate-500 text-[12px]">—</span>
+              <span v-else-if="svcCancelRate(svc.service) < 5"
+                class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
+                Sehat
+              </span>
+              <span v-else
+                class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 font-semibold whitespace-nowrap">
+                Perhatian
+              </span>
+            </div>
+
+            <!-- Mobile: total order + kondisi badges -->
+            <div class="flex md:hidden items-center gap-1.5 mt-1 mb-2 flex-wrap">
+              <span v-if="svcStats(svc.service).total > 0"
+                class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold tabular-nums whitespace-nowrap">
+                {{ svcStats(svc.service).total.toLocaleString('id-ID') }} order
+              </span>
+              <template v-if="svcStats(svc.service).total > 0">
+                <span v-if="svcCancelRate(svc.service) < 5"
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
+                  ✓ Sehat
+                </span>
+                <span v-else
+                  class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 font-semibold whitespace-nowrap">
+                  ⚠ Perhatian
+                </span>
+              </template>
             </div>
 
             <!-- Mobile bottom row: harga + badge + aksi -->
@@ -273,8 +324,29 @@
 
 <script setup lang="ts">
 import type { RawService } from '~/server/api/services.get'
+import type { RawOrder } from '~/server/api/orders.get'
 
 const panelUrl = useRuntimeConfig().public.panelUrl
+
+const orderMap = computed(() => {
+  const map = new Map<number, { total: number; canceled: number }>()
+  for (const o of (props.rawOrders ?? [])) {
+    if (!map.has(o.service_id)) map.set(o.service_id, { total: 0, canceled: 0 })
+    const s = map.get(o.service_id)!
+    s.total++
+    if (['canceled', 'cancelled'].includes(o.status)) s.canceled++
+  }
+  return map
+})
+
+function svcStats(id: number) {
+  return orderMap.value.get(id) ?? { total: 0, canceled: 0 }
+}
+
+function svcCancelRate(id: number) {
+  const s = svcStats(id)
+  return s.total > 0 ? (s.canceled / s.total) * 100 : 0
+}
 
 const props = defineProps<{
   services: RawService[]
@@ -282,6 +354,7 @@ const props = defineProps<{
   searchQuery: string
   selectedPlatform: string
   selectedPeriod?: string
+  rawOrders?: RawOrder[]
 }>()
 
 const { toggle: toggleWatch, isWatched, count: watchlistCount } = useWatchlist()
@@ -290,33 +363,38 @@ const { toggle: toggleCompare, isSelected: isComparing, canAdd: canCompare } = u
 const onlyRefill = ref(false)
 const onlyCancel = ref(false)
 const onlyWatchlist = ref(false)
+const onlySehat = ref(false)
 const selectedSort = ref('')
 
 const sortOptions = [
-  { value: '',          label: 'Urutan Default' },
-  { value: 'name_asc',  label: 'Nama A → Z' },
-  { value: 'name_desc', label: 'Nama Z → A' },
-  { value: 'price_asc', label: 'Harga Termurah' },
-  { value: 'price_desc',label: 'Harga Termahal' },
-  { value: 'min_asc',   label: 'Min Order ↑' },
-  { value: 'min_desc',  label: 'Min Order ↓' },
-  { value: 'max_asc',   label: 'Max Order ↑' },
-  { value: 'max_desc',  label: 'Max Order ↓' },
+  { value: '',             label: 'Urutan Default' },
+  { value: 'name_asc',    label: 'Nama A → Z' },
+  { value: 'name_desc',   label: 'Nama Z → A' },
+  { value: 'price_asc',   label: 'Harga Termurah' },
+  { value: 'price_desc',  label: 'Harga Termahal' },
+  { value: 'min_asc',     label: 'Min Order ↑' },
+  { value: 'min_desc',    label: 'Min Order ↓' },
+  { value: 'max_asc',     label: 'Max Order ↑' },
+  { value: 'max_desc',    label: 'Max Order ↓' },
+  { value: 'orders_desc', label: 'Order ↓ (Terbanyak)' },
+  { value: 'orders_asc',  label: 'Order ↑ (Tersedikit)' },
 ]
 
 function sortServices(list: RawService[]): RawService[] {
   if (!selectedSort.value) return list
   return [...list].sort((a, b) => {
     switch (selectedSort.value) {
-      case 'name_asc':   return a.name.localeCompare(b.name)
-      case 'name_desc':  return b.name.localeCompare(a.name)
-      case 'price_asc':  return Number(a.rate) - Number(b.rate)
-      case 'price_desc': return Number(b.rate) - Number(a.rate)
-      case 'min_asc':    return Number(a.min) - Number(b.min)
-      case 'min_desc':   return Number(b.min) - Number(a.min)
-      case 'max_asc':    return Number(a.max) - Number(b.max)
-      case 'max_desc':   return Number(b.max) - Number(a.max)
-      default:           return 0
+      case 'name_asc':    return a.name.localeCompare(b.name)
+      case 'name_desc':   return b.name.localeCompare(a.name)
+      case 'price_asc':   return Number(a.rate) - Number(b.rate)
+      case 'price_desc':  return Number(b.rate) - Number(a.rate)
+      case 'min_asc':     return Number(a.min) - Number(b.min)
+      case 'min_desc':    return Number(b.min) - Number(a.min)
+      case 'max_asc':     return Number(a.max) - Number(b.max)
+      case 'max_desc':    return Number(b.max) - Number(a.max)
+      case 'orders_desc': return (orderMap.value.get(b.service)?.total ?? 0) - (orderMap.value.get(a.service)?.total ?? 0)
+      case 'orders_asc':  return (orderMap.value.get(a.service)?.total ?? 0) - (orderMap.value.get(b.service)?.total ?? 0)
+      default:            return 0
     }
   })
 }
@@ -353,6 +431,10 @@ const filteredGroups = computed(() => {
   if (onlyRefill.value) list = list.filter(s => s.refill)
   if (onlyCancel.value) list = list.filter(s => s.cancel)
   if (onlyWatchlist.value) list = list.filter(s => isWatched(s.service))
+  if (onlySehat.value) list = list.filter(s => {
+    const st = orderMap.value.get(s.service)
+    return !!st && st.total > 0 && (st.canceled / st.total) * 100 < 5
+  })
 
   const grouped = new Map<string, { platform: string; icon: string; services: RawService[] }>()
   for (const svc of list) {

@@ -75,6 +75,7 @@
             :searchQuery="searchQuery"
             :selectedPlatform="selectedPlatform"
             :selectedPeriod="selectedPeriod"
+            :rawOrders="rawOrders"
           />
         </div>
 
@@ -168,6 +169,7 @@
       v-if="showComparison"
       :allServices="rawServicesList"
       :ids="comparisonIds"
+      :rawOrders="rawOrders"
       @close="showComparison = false"
     />
   </div>

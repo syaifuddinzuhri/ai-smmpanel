@@ -6,7 +6,7 @@
 
       <!-- Modal -->
       <div
-        class="relative w-full sm:max-w-[820px] max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#111827]"
+        class="relative w-full sm:max-w-[860px] max-h-[90vh] flex flex-col rounded-t-2xl sm:rounded-2xl bg-white dark:bg-[#111827]"
         :style="{ border: '1px solid var(--border)' }"
       >
         <!-- Header -->
@@ -74,6 +74,7 @@
                   >
                     {{ row.label }}
                   </td>
+
                   <!-- Cells -->
                   <td
                     v-for="(cell, ci) in row.cells"
@@ -94,6 +95,7 @@
                         {{ cell.value ? 'Ya' : 'Tidak' }}
                       </span>
                     </template>
+
                     <!-- Number -->
                     <template v-else-if="row.type === 'number'">
                       <div class="flex flex-col items-center gap-1">
@@ -102,18 +104,95 @@
                             'text-[17px] font-bold tabular-nums',
                             cell.isBest ? 'text-emerald-500 dark:text-emerald-400' : 'text-slate-800 dark:text-slate-200'
                           ]"
-                        >
-                          {{ cell.display }}
-                        </span>
+                        >{{ cell.display }}</span>
                         <span
                           v-if="cell.isBest"
                           class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 uppercase tracking-wide"
-                        >
-                          Terbaik
-                        </span>
+                        >Terbaik</span>
                       </div>
                     </template>
-                    <!-- Text -->
+
+                    <!-- Health (Sehat/Tidak) -->
+                    <template v-else-if="row.type === 'health'">
+                      <template v-if="cell.total === 0">
+                        <span class="text-slate-400 text-[12px]">— Belum ada data</span>
+                      </template>
+                      <template v-else>
+                        <div class="flex flex-col items-center gap-1">
+                          <span
+                            :class="[
+                              'inline-flex items-center gap-1 text-[11px] px-2.5 py-1 rounded-full font-semibold border',
+                              (cell.cancelRate ?? 0) < 5
+                                ? 'bg-emerald-500/10 border-emerald-500/25 text-emerald-600 dark:text-emerald-400'
+                                : 'bg-red-500/10 border-red-500/20 text-red-500 dark:text-red-400'
+                            ]"
+                          >
+                            <Icon :name="(cell.cancelRate ?? 0) < 5 ? 'heroicons:check-circle' : 'heroicons:exclamation-triangle'" class="w-3 h-3" />
+                            {{ (cell.cancelRate ?? 0) < 5 ? 'Sehat' : 'Perlu Perhatian' }}
+                          </span>
+                          <span class="text-[10px] text-slate-500">Cancel {{ cell.cancelRate?.toFixed(1) }}%</span>
+                        </div>
+                      </template>
+                    </template>
+
+                    <!-- Popularity (Laris/Tidak) -->
+                    <template v-else-if="row.type === 'popular'">
+                      <template v-if="cell.total === 0">
+                        <span class="text-slate-400 text-[12px]">—</span>
+                      </template>
+                      <template v-else>
+                        <div class="flex flex-col items-center gap-1">
+                          <span
+                            :class="[
+                              'text-[17px] font-bold tabular-nums',
+                              cell.isBest ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-800 dark:text-slate-200'
+                            ]"
+                          >{{ cell.display }}</span>
+                          <span
+                            v-if="cell.isBest"
+                            class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 uppercase tracking-wide"
+                          >Terlaris</span>
+                          <span v-else class="text-[10px] text-slate-400">order</span>
+                        </div>
+                      </template>
+                    </template>
+
+                    <!-- Distribution bar -->
+                    <template v-else-if="row.type === 'dist'">
+                      <template v-if="!cell.dist || cell.dist.total === 0">
+                        <span class="text-slate-400 text-[12px]">—</span>
+                      </template>
+                      <template v-else>
+                        <div class="min-w-[130px]">
+                          <div class="flex h-2 rounded-full overflow-hidden gap-px mb-2">
+                            <div v-if="cell.dist.completed"  class="bg-emerald-500 transition-all" :style="{ flex: cell.dist.completed }" />
+                            <div v-if="cell.dist.partial"    class="bg-yellow-400 transition-all" :style="{ flex: cell.dist.partial }" />
+                            <div v-if="cell.dist.processing" class="bg-blue-500 transition-all"   :style="{ flex: cell.dist.processing }" />
+                            <div v-if="cell.dist.inProgress" class="bg-violet-500 transition-all" :style="{ flex: cell.dist.inProgress }" />
+                            <div v-if="cell.dist.canceled"   class="bg-red-400 transition-all"    :style="{ flex: cell.dist.canceled }" />
+                          </div>
+                          <div class="flex flex-wrap gap-x-2 gap-y-0.5 justify-center">
+                            <span v-if="cell.dist.completed"  class="flex items-center gap-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 flex-shrink-0" />{{ pctOf(cell.dist.completed, cell.dist.total) }}%
+                            </span>
+                            <span v-if="cell.dist.partial"    class="flex items-center gap-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 flex-shrink-0" />{{ pctOf(cell.dist.partial, cell.dist.total) }}%
+                            </span>
+                            <span v-if="cell.dist.processing" class="flex items-center gap-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-blue-500 flex-shrink-0" />{{ pctOf(cell.dist.processing, cell.dist.total) }}%
+                            </span>
+                            <span v-if="cell.dist.inProgress" class="flex items-center gap-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-violet-500 flex-shrink-0" />{{ pctOf(cell.dist.inProgress, cell.dist.total) }}%
+                            </span>
+                            <span v-if="cell.dist.canceled"   class="flex items-center gap-0.5 text-[9px] text-slate-500 dark:text-slate-400">
+                              <span class="w-1.5 h-1.5 rounded-full bg-red-400 flex-shrink-0" />{{ pctOf(cell.dist.canceled, cell.dist.total) }}%
+                            </span>
+                          </div>
+                        </div>
+                      </template>
+                    </template>
+
+                    <!-- Text fallback -->
                     <template v-else>
                       <span class="text-[13px] text-slate-700 dark:text-slate-300">{{ cell.display }}</span>
                     </template>
@@ -131,7 +210,7 @@
         >
           <p class="text-[11px] text-slate-500 flex items-center gap-1.5">
             <Icon name="heroicons:light-bulb" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            Nilai <span class="text-emerald-400 font-semibold mx-0.5">terbaik</span> per metrik disorot hijau
+            Nilai <span class="text-emerald-600 dark:text-emerald-400 font-semibold mx-0.5">terbaik</span> disorot hijau · Sehat jika cancel &lt; 5%
           </p>
           <button
             class="px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-colors text-slate-500 hover:text-slate-900 dark:hover:text-white"
@@ -148,10 +227,12 @@
 
 <script setup lang="ts">
 import type { RawService } from '~/server/api/services.get'
+import type { RawOrder } from '~/server/api/orders.get'
 
 const props = defineProps<{
   allServices: RawService[]
   ids: number[]
+  rawOrders: RawOrder[]
 }>()
 
 defineEmits<{ close: [] }>()
@@ -178,33 +259,58 @@ function platformIcon(name: string): string {
 }
 
 function fmtRate(n: number): string {
-  return 'Rp ' + n.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+  return 'Rp ' + n.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
 }
 
 function fmtNum(n: number): string {
   return n.toLocaleString('id-ID')
 }
 
-type Cell = { value: boolean | number | string; display: string; isBest: boolean }
-type Row = { key: string; label: string; type: 'text' | 'number' | 'bool'; cells: Cell[] }
+function pctOf(part: number, total: number): number {
+  return total === 0 ? 0 : Math.round((part / total) * 100)
+}
+
+type Dist = { total: number; completed: number; partial: number; processing: number; inProgress: number; canceled: number }
+type Cell = {
+  value: boolean | number | string
+  display: string
+  isBest: boolean
+  cancelRate?: number
+  total?: number
+  dist?: Dist
+}
+type RowType = 'text' | 'number' | 'bool' | 'health' | 'popular' | 'dist'
+type Row = { key: string; label: string; type: RowType; cells: Cell[] }
+
+// Per-service order stats from rawOrders
+const svcStats = computed(() => {
+  const map = new Map<number, Dist>()
+  for (const svc of selected.value) {
+    const orders = props.rawOrders.filter(o => o.service_id === svc.service)
+    const total = orders.length
+    const completed  = orders.filter(o => o.status === 'completed').length
+    const partial    = orders.filter(o => o.status === 'partial').length
+    const processing = orders.filter(o => o.status === 'processing').length
+    const inProgress = orders.filter(o => ['inprogress', 'in_progress'].includes(o.status)).length
+    const canceled   = orders.filter(o => ['canceled', 'cancelled'].includes(o.status)).length
+    map.set(svc.service, { total, completed, partial, processing, inProgress, canceled })
+  }
+  return map
+})
 
 const rows = computed((): Row[] => {
   const svcs = selected.value
   if (svcs.length < 2) return []
 
   const numRow = (
-    key: string,
-    label: string,
+    key: string, label: string,
     get: (s: RawService) => number,
     fmt: (n: number) => string,
     winner: 'min' | 'max'
   ): Row => {
     const vals = svcs.map(get)
     const best = winner === 'min' ? Math.min(...vals) : Math.max(...vals)
-    return {
-      key, label, type: 'number',
-      cells: vals.map(v => ({ value: v, display: fmt(v), isBest: v === best }))
-    }
+    return { key, label, type: 'number', cells: vals.map(v => ({ value: v, display: fmt(v), isBest: v === best })) }
   }
 
   const boolRow = (key: string, label: string, get: (s: RawService) => boolean): Row => ({
@@ -217,13 +323,36 @@ const rows = computed((): Row[] => {
     cells: svcs.map(s => ({ value: get(s), display: get(s) || '—', isBest: false }))
   })
 
+  // Health row
+  const healthCells: Cell[] = svcs.map(s => {
+    const st = svcStats.value.get(s.service)
+    const cancelRate = st && st.total > 0 ? (st.canceled / st.total) * 100 : 0
+    return { value: cancelRate < 5, display: '', isBest: false, cancelRate, total: st?.total ?? 0 }
+  })
+
+  // Popularity row
+  const orderCounts = svcs.map(s => svcStats.value.get(s.service)?.total ?? 0)
+  const maxOrders = Math.max(...orderCounts, 1)
+  const popularCells: Cell[] = orderCounts.map((v, i) => ({
+    value: v, display: fmtNum(v), isBest: v === maxOrders && v > 0, total: v
+  }))
+
+  // Distribution row
+  const distCells: Cell[] = svcs.map(s => {
+    const st = svcStats.value.get(s.service)
+    return { value: st?.total ?? 0, display: '', isBest: false, total: st?.total ?? 0, dist: st }
+  })
+
   return [
     textRow('kategori', 'Kategori', s => s.category),
     numRow('rate',  'Harga / 1000', s => Number(s.rate), fmtRate, 'min'),
+    { key: 'popular',  label: 'Total Order',       type: 'popular', cells: popularCells },
+    { key: 'health',   label: 'Kondisi',          type: 'health',  cells: healthCells },
+    boolRow('refill', 'Refill', s => !!s.refill),
+    boolRow('cancel', 'Cancel', s => !!s.cancel),
     numRow('min',   'Min Order',    s => Number(s.min),  fmtNum,  'min'),
     numRow('max',   'Max Order',    s => Number(s.max),  fmtNum,  'max'),
-    boolRow('refill', 'Refill',  s => !!s.refill),
-    boolRow('cancel', 'Cancel',  s => !!s.cancel),
+    { key: 'dist',     label: 'Distribusi Status', type: 'dist',    cells: distCells },
   ]
 })
 </script>
