@@ -348,7 +348,7 @@ const rows = computed((): Row[] => {
 
   return [
     textRow('kategori', 'Kategori', s => s.category),
-    numRow('rate',  'Harga / 1000', s => Number(s.rate), fmtRate, 'min'),
+    numRow('rate',  'Harga / 100', s => Number(s.rate) / 10, fmtRate, 'min'),
     { key: 'popular',  label: 'Total Order',       type: 'popular', cells: popularCells },
     { key: 'health',   label: 'Kondisi',          type: 'health',  cells: healthCells },
     boolRow('refill', 'Refill', s => !!s.refill),

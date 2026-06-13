@@ -68,7 +68,7 @@
       </div>
       <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="(svc, i) in topPerformers" :key="svc.id"
-          class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--row-hover)]">
+          class="flex items-center gap-2 px-4 py-3 transition-colors hover:bg-[var(--row-hover)]">
           <div :class="[
             'w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0',
             i === 0 ? 'bg-amber-500/20 dark:text-amber-300 text-amber-500' : i === 1 ? 'bg-slate-400/20 text-slate-500 dark:text-slate-300' : i === 2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-slate-500'
@@ -76,11 +76,15 @@
           <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
           <div class="flex-1 min-w-0">
             <p class="text-slate-700 dark:text-slate-300 text-[12px] font-medium truncate">{{ svc.name }}</p>
-            <p class="text-slate-500 dark:text-slate-600 text-[11px]">{{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+            <p class="text-slate-500 dark:text-slate-600 text-[11px]">ID: {{ svc.id }} · {{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
           </div>
-          <div class="text-right flex-shrink-0">
+          <div class="flex flex-col items-end gap-1 flex-shrink-0">
             <p :class="['text-[13px] font-bold', svc.aiScore >= 95 ? 'text-emerald-400' : 'text-violet-400']">{{ svc.aiScore }}</p>
-            <p class="text-slate-500 dark:text-slate-600 text-[10px]">score</p>
+            <a
+              :href="`${panelUrl}?service=${svc.id}`"
+              target="_blank" rel="noopener noreferrer"
+              class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white transition-colors"
+            >Beli</a>
           </div>
         </div>
       </div>
@@ -99,15 +103,22 @@
       </div>
       <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="svc in trendingServices" :key="svc.id"
-          class="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-[var(--row-hover)]">
+          class="flex items-center gap-2 px-4 py-3 transition-colors hover:bg-[var(--row-hover)]">
           <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
           <div class="flex-1 min-w-0">
             <p class="text-slate-700 dark:text-slate-300 text-[12px] font-medium truncate">{{ svc.name }}</p>
-            <p class="text-slate-500 dark:text-slate-600 text-[11px]">{{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+            <p class="text-slate-500 dark:text-slate-600 text-[11px]">ID: {{ svc.id }} · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
           </div>
-          <div class="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
-            <Icon name="heroicons:arrow-trending-up" class="w-3 h-3 text-emerald-400" />
-            <span class="text-emerald-400 text-[11px] font-bold">+{{ svc.trendPercent }}%</span>
+          <div class="flex flex-col items-end gap-1 flex-shrink-0">
+            <div class="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+              <Icon name="heroicons:arrow-trending-up" class="w-3 h-3 text-emerald-400" />
+              <span class="text-emerald-400 text-[11px] font-bold">+{{ svc.trendPercent }}%</span>
+            </div>
+            <a
+              :href="`${panelUrl}?service=${svc.id}`"
+              target="_blank" rel="noopener noreferrer"
+              class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white transition-colors"
+            >Beli</a>
           </div>
         </div>
       </div>
@@ -124,16 +135,22 @@
       </div>
       <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04] max-h-[380px] overflow-y-auto scrollbar-hide">
         <div v-for="svc in riskyServices" :key="svc.id"
-          class="flex items-center gap-3 px-4 py-3">
+          class="flex items-center gap-2 px-4 py-3">
           <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
           <div class="flex-1 min-w-0">
             <p class="text-slate-700 dark:text-slate-300 text-[12px] font-medium truncate">{{ svc.name }}</p>
+            <p class="text-slate-600 text-[10px]">ID: {{ svc.id }}</p>
             <div class="flex items-center gap-2 mt-0.5">
               <span class="text-red-400 text-[11px]">Cancel {{ svc.cancelRate }}%</span>
               <span class="text-slate-600">·</span>
               <span class="text-amber-400 text-[11px]">SR {{ svc.successRate }}%</span>
             </div>
           </div>
+          <a
+            :href="`${panelUrl}?service=${svc.id}`"
+            target="_blank" rel="noopener noreferrer"
+            class="text-[10px] font-semibold px-2.5 py-1 rounded-md bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white transition-colors flex-shrink-0"
+          >Beli</a>
         </div>
       </div>
     </div>
@@ -152,6 +169,7 @@ defineProps<{
   trendingServices: Service[]
 }>()
 
+const panelUrl = useRuntimeConfig().public.panelUrl
 const activeTab = ref('insight')
 
 const tabs = [

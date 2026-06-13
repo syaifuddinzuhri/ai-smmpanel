@@ -146,7 +146,7 @@
         <!-- Column headers (desktop) -->
         <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_80px_110px_148px_180px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 1000</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 100</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Max Order</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Orders</span>
@@ -176,9 +176,9 @@
             <!-- Harga/1000 -->
             <div class="hidden md:block text-center">
               <p class="text-indigo-400 dark:text-indigo-300 text-[13px] font-semibold tabular-nums">
-                {{ Number(svc.rate) > 0 ? 'Rp ' + Number(svc.rate).toLocaleString('id-ID') : '—' }}
+                {{ Number(svc.rate) > 0 ? 'Rp ' + (Number(svc.rate) / 10).toLocaleString('id-ID') : '—' }}
               </p>
-              <p class="text-slate-700 text-[10px]">per 1000</p>
+              <p class="text-slate-700 text-[10px]">per 100</p>
             </div>
 
             <!-- Min order -->
@@ -235,7 +235,7 @@
             <!-- Mobile bottom row: harga + badge + aksi -->
             <div class="flex md:contents items-center gap-2">
               <span class="md:hidden text-indigo-400 dark:text-indigo-300 text-[12px] font-bold tabular-nums">
-                Rp&nbsp;{{ Number(svc.rate).toLocaleString('id-ID') }}<span class="text-slate-500 font-normal text-[10px]">/1000</span>
+                Rp&nbsp;{{ (Number(svc.rate) / 10).toLocaleString('id-ID') }}<span class="text-slate-500 font-normal text-[10px]">/100</span>
               </span>
               <div class="flex items-center gap-1.5 flex-1 md:justify-end">
                 <span v-if="svc.refill"

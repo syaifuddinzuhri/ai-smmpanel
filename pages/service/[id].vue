@@ -504,13 +504,13 @@
                     <p
                       v-if="order.link"
                       class="text-slate-700 dark:text-slate-300 text-[12px] truncate max-w-[300px]"
-                      :title="order.link"
+                      title="***"
                     >
-                      {{ order.link }}
+                      {{ maskLink(order.link) }}
                     </p>
                     <p v-else class="text-slate-600 text-[12px] italic">—</p>
                     <p class="text-slate-600 text-[10px] mt-0.5">
-                      ID: {{ order.id }}
+                      ID: {{ maskId(order.id) }}
                     </p>
                   </td>
                   <td class="px-3 py-3 text-center">
@@ -586,7 +586,7 @@
               <div class="flex items-start justify-between gap-3 mb-2">
                 <div class="min-w-0 flex-1">
                   <p class="text-slate-600 text-[10px] mb-0.5">
-                    ID: {{ order.id }} · #{{
+                    ID: {{ maskId(order.id) }} · #{{
                       (currentPage - 1) * perPage + i + 1
                     }}
                   </p>
@@ -594,7 +594,7 @@
                     v-if="order.link"
                     class="text-slate-700 dark:text-slate-300 text-[12px] truncate"
                   >
-                    {{ order.link }}
+                    {{ maskLink(order.link) }}
                   </p>
                   <p v-else class="text-slate-600 text-[12px] italic">
                     Tidak ada link
@@ -922,6 +922,25 @@ function statusStyle(status: string) {
     barColor: "bg-slate-500",
     textColor: "text-slate-400"
   };
+}
+
+function maskLink(link: string): string {
+  if (!link) return '—'
+  try {
+    const url = new URL(link)
+    const pathRaw = (url.pathname + url.search).replace(/^\//, '')
+    if (pathRaw.length <= 4) return url.origin + '/***'
+    const masked = pathRaw.slice(0, 2) + '****' + pathRaw.slice(-2)
+    return url.origin + '/' + masked
+  } catch {
+    return '***'
+  }
+}
+
+function maskId(id: string | number): string {
+  const s = String(id)
+  if (s.length <= 3) return '***'
+  return s.slice(0, 2) + '***' + s.slice(-1)
 }
 
 function formatDate(ts?: number) {

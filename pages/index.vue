@@ -14,10 +14,10 @@
       :apiError="apiError"
       :platforms="platforms"
       :periods="periods"
-      :selectedPlatform="selectedPlatform"
+      :selectedPlatform="isSidebarTab ? sidebarPlatform : selectedPlatform"
       :selectedPeriod="selectedPeriod"
-      :showPlatformFilter="activeTab !== 'analitik'"
-      @update:selectedPlatform="selectedPlatform = $event"
+      :showPlatformFilter="activeTab === 'monitor' || activeTab === 'rekomendasi' || isSidebarTab"
+      @update:selectedPlatform="isSidebarTab ? (sidebarPlatform = $event) : (selectedPlatform = $event)"
       @update:selectedPeriod="selectedPeriod = $event"
       @resync="resync"
     />
@@ -90,29 +90,168 @@
         </div>
 
         <!-- TAB: AI Rekomendasi -->
-        <div v-else key="rekomendasi">
-          <div class="grid grid-cols-1 xl:grid-cols-[1fr_296px] gap-4">
-            <ServiceTable
-              :services="filteredServices"
-              :isLoading="isLoading"
-              :lastUpdate="lastUpdate"
-              :sortOptions="sortOptions"
-              :selectedSort="selectedSort"
-              :selectedPeriod="selectedPeriod"
-              class="order-2 xl:order-1"
-              @update:selectedSort="selectedSort = $event"
-            />
-            <AiSidebar
-              :isLoading="isLoading"
-              :aiInsight="aiInsight"
-              :aiInsightLoading="aiInsightLoading"
-              :topPerformers="topPerformers"
-              :riskyServices="riskyServices"
-              :trendingServices="trendingServices"
-              class="order-1 xl:order-2"
-            />
+        <div v-else-if="activeTab === 'rekomendasi'" key="rekomendasi">
+          <ServiceTable
+            :services="filteredServices"
+            :isLoading="isLoading"
+            :lastUpdate="lastUpdate"
+            :sortOptions="sortOptions"
+            :selectedSort="selectedSort"
+            :selectedPeriod="selectedPeriod"
+            @update:selectedSort="selectedSort = $event"
+          />
+        </div>
+
+        <!-- TAB: Top Performer -->
+        <div v-else-if="activeTab === 'top'" key="top">
+          <div class="card overflow-hidden">
+            <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
+              <Icon name="heroicons:trophy" class="w-4 h-4 text-amber-400" />
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">Top 10 Performer</span>
+              <span class="text-[11px] text-slate-500 ml-1">Layanan dengan Score tertinggi</span>
+            </div>
+            <div v-if="isLoading" class="p-5 space-y-3">
+              <div v-for="i in 5" :key="i" class="flex items-center gap-4">
+                <div class="skeleton w-6 h-6 rounded-full flex-shrink-0"></div>
+                <div class="skeleton w-5 h-5 flex-shrink-0"></div>
+                <div class="flex-1 space-y-1.5"><div class="skeleton w-3/4 h-3"></div><div class="skeleton w-1/3 h-2.5"></div></div>
+                <div class="skeleton w-10 h-5 flex-shrink-0"></div>
+              </div>
+            </div>
+            <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04]">
+              <div v-for="(svc, i) in filteredTop" :key="svc.id"
+                class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--row-hover)]">
+                <div :class="[
+                  'w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-bold flex-shrink-0',
+                  i === 0 ? 'bg-amber-500/20 text-amber-400' : i === 1 ? 'bg-slate-400/20 text-slate-400' : i === 2 ? 'bg-orange-700/20 text-orange-500' : 'bg-white/5 text-slate-500'
+                ]">{{ i + 1 }}</div>
+                <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</p>
+                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                  <div class="text-right">
+                    <p :class="['text-[15px] font-black', svc.aiScore >= 95 ? 'text-emerald-400' : 'text-violet-400']">{{ svc.aiScore }}</p>
+                    <p class="text-slate-600 text-[10px]">score</p>
+                  </div>
+                  <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">Beli</a>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- TAB: Trending -->
+        <div v-else-if="activeTab === 'trending'" key="trending">
+          <div class="card overflow-hidden">
+            <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
+              <Icon name="heroicons:arrow-trending-up" class="w-4 h-4 text-emerald-400" />
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">Trending 10 Teratas</span>
+              <span class="text-[11px] text-slate-500 ml-1">Layanan dengan pertumbuhan order tertinggi</span>
+            </div>
+            <div v-if="isLoading" class="p-5 space-y-3">
+              <div v-for="i in 5" :key="i" class="flex items-center gap-4">
+                <div class="skeleton w-5 h-5 flex-shrink-0"></div>
+                <div class="flex-1 space-y-1.5"><div class="skeleton w-3/4 h-3"></div><div class="skeleton w-1/4 h-2.5"></div></div>
+                <div class="skeleton w-14 h-5 flex-shrink-0"></div>
+              </div>
+            </div>
+            <div v-else-if="filteredTrending.length === 0" class="px-5 py-10 text-center">
+              <p class="text-slate-500 text-[13px]">Tidak ada layanan trending saat ini</p>
+            </div>
+            <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04]">
+              <div v-for="svc in filteredTrending" :key="svc.id"
+                class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--row-hover)]">
+                <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</p>
+                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+                </div>
+                <div class="flex items-center gap-3 flex-shrink-0">
+                  <div class="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1">
+                    <Icon name="heroicons:arrow-trending-up" class="w-3.5 h-3.5 text-emerald-400" />
+                    <span class="text-emerald-400 text-[12px] font-bold">+{{ svc.trendPercent }}%</span>
+                  </div>
+                  <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">Beli</a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Risiko -->
+        <div v-else-if="activeTab === 'risk'" key="risk">
+          <div class="card overflow-hidden">
+            <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
+              <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 text-red-400" />
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">10 Layanan Berisiko Teratas</span>
+              <span class="text-[11px] text-slate-500 ml-1">Cancel rate tinggi atau success rate rendah</span>
+            </div>
+            <div v-if="isLoading" class="p-5 space-y-3">
+              <div v-for="i in 4" :key="i" class="flex items-center gap-4">
+                <div class="skeleton w-5 h-5 flex-shrink-0"></div>
+                <div class="flex-1 space-y-1.5"><div class="skeleton w-2/3 h-3"></div><div class="skeleton w-1/3 h-2.5"></div></div>
+              </div>
+            </div>
+            <div v-else-if="filteredRisky.length === 0" class="flex items-center gap-2.5 px-5 py-6">
+              <Icon name="heroicons:check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0" />
+              <span class="text-[13px] font-medium text-emerald-400">Tidak ada layanan berisiko!</span>
+            </div>
+            <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04]">
+              <div v-for="svc in filteredRisky" :key="svc.id"
+                class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--row-hover)]">
+                <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
+                <div class="flex-1 min-w-0">
+                  <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</p>
+                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }}</p>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-red-400 text-[11px] font-medium">Cancel {{ svc.cancelRate }}%</span>
+                    <span class="text-slate-600">·</span>
+                    <span class="text-amber-400 text-[11px] font-medium">SR {{ svc.successRate }}%</span>
+                  </div>
+                </div>
+                <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
+                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors flex-shrink-0">Beli</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: Insight -->
+        <div v-else-if="activeTab === 'insight'" key="insight">
+          <div class="card p-6 max-w-2xl">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
+                <Icon name="heroicons:sparkles" class="w-4 h-4 text-indigo-400" />
+              </div>
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">AI Insight</span>
+              <span v-if="aiInsightLoading" class="flex items-center gap-1 text-[11px] text-violet-400 ml-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse inline-block"></span>
+                Memperbarui…
+              </span>
+            </div>
+            <div v-if="isLoading || (!aiInsight && aiInsightLoading)" class="space-y-2">
+              <div class="skeleton w-full h-3"></div><div class="skeleton w-5/6 h-3"></div>
+              <div class="skeleton w-4/6 h-3"></div><div class="skeleton w-5/6 h-3"></div>
+            </div>
+            <p v-else class="text-[13.5px] text-slate-600 dark:text-slate-400 leading-relaxed">{{ aiInsight }}</p>
+            <div class="mt-5 pt-4 grid grid-cols-2 gap-3" :style="{ borderTop: '1px solid var(--border)' }">
+              <div class="rounded-xl p-3.5 text-center" :style="{ background: 'var(--bg-subtle)' }">
+                <p class="text-indigo-300 font-black text-[22px]">{{ topPerformers[0]?.aiScore ?? '—' }}</p>
+                <p class="text-slate-500 text-[11px] mt-0.5">Top AI Score</p>
+              </div>
+              <div class="rounded-xl p-3.5 text-center" :style="{ background: 'var(--bg-subtle)' }">
+                <p class="text-emerald-300 font-black text-[22px]">{{ trendingServices[0] ? '+' + trendingServices[0].trendPercent + '%' : '—' }}</p>
+                <p class="text-slate-500 text-[11px] mt-0.5">Top Trend</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div v-else key="fallback"></div>
       </Transition>
 
       <!-- Footer -->
@@ -185,12 +324,40 @@ const {
   isLoading, fromCache, apiError, resync,
   selectedPlatform, selectedPeriod, selectedSort,
   searchQuery, platforms, periods, sortOptions, filteredServices,
-  rawOrders, rawServicesList,
+  rawOrders, rawServicesList, services,
   stats, topPerformers, riskyServices, trendingServices,
   aiInsight, aiInsightLoading, lastUpdate
 } = useServices()
 
+const sidebarPlatform = ref('Semua')
+
+const sidebarFiltered = computed(() =>
+  sidebarPlatform.value === 'Semua'
+    ? services.value
+    : services.value.filter(s => s.platform === sidebarPlatform.value)
+)
+
+const filteredTop = computed(() =>
+  [...sidebarFiltered.value].sort((a, b) => b.aiScore - a.aiScore).slice(0, 10)
+)
+
+const filteredTrending = computed(() =>
+  [...sidebarFiltered.value]
+    .filter(s => s.trend === 'up' && s.trendPercent > 8)
+    .sort((a, b) => b.trendPercent - a.trendPercent)
+    .slice(0, 10)
+)
+
+const filteredRisky = computed(() =>
+  sidebarFiltered.value
+    .filter(s => s.cancelRate > 2 || s.successRate < 95)
+    .sort((a, b) => b.cancelRate - a.cancelRate)
+    .slice(0, 10)
+)
+
+const panelUrl = useRuntimeConfig().public.panelUrl
 const activeTab = ref('monitor')
+const isSidebarTab = computed(() => ['top', 'trending', 'risk'].includes(activeTab.value))
 
 const { ids: comparisonIds, clear: clearComparison, count: comparisonCount } = useComparison()
 const showComparison = ref(false)
@@ -206,9 +373,13 @@ onMounted(() => {
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
 const mainTabs = [
-  { key: 'monitor',     icon: 'heroicons:signal',    label: 'Monitoring Layanan' },
-  { key: 'rekomendasi', icon: 'heroicons:cpu-chip',  label: 'AI Rekomendasi' },
-  { key: 'analitik',   icon: 'heroicons:chart-bar',  label: 'Analitik' },
+  { key: 'monitor',     icon: 'heroicons:signal',               label: 'Monitoring' },
+  { key: 'rekomendasi', icon: 'heroicons:cpu-chip',             label: 'Rekomendasi' },
+  { key: 'top',         icon: 'heroicons:trophy',               label: 'Top' },
+  { key: 'trending',    icon: 'heroicons:arrow-trending-up',    label: 'Trend' },
+  { key: 'risk',        icon: 'heroicons:exclamation-triangle', label: 'Risiko' },
+  // { key: 'insight',     icon: 'heroicons:light-bulb',           label: 'Insight' },
+  { key: 'analitik',    icon: 'heroicons:chart-bar',            label: 'Analitik' },
 ]
 </script>
 

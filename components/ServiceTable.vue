@@ -55,7 +55,7 @@
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Orders</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Cancel</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Trend</th>
-            <th class="text-right px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Harga</th>
+            <th class="text-right px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest w-36">Harga / 100</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Aksi</th>
           </tr>
         </thead>
@@ -140,7 +140,7 @@
             </td>
 
             <!-- Price -->
-            <td class="px-3 py-3 text-right whitespace-nowrap">
+            <td class="px-3 py-3 text-right whitespace-nowrap w-36">
               <span class="text-[13px] font-semibold text-indigo-400 tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
             </td>
 

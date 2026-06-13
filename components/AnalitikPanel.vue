@@ -96,7 +96,7 @@
       </div>
 
       <!-- Row 3: Revenue + Category -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
 
         <!-- Top Volume -->
         <div class="card p-5">
@@ -105,7 +105,7 @@
               <div class="w-1.5 h-4 rounded bg-gradient-to-b from-indigo-500 to-violet-600"></div>
               <span class="text-[13px] font-bold text-slate-900 dark:text-white">Layanan Terpopuler</span>
             </div>
-            <span class="text-[11px] text-slate-500">by jumlah order</span>
+            <span class="text-[11px] text-slate-500">Berdasarkan jumlah order</span>
           </div>
           <div v-if="isLoading" class="space-y-3">
             <div v-for="i in 5" :key="i" class="skeleton w-full h-7"></div>
@@ -121,6 +121,7 @@
                   <span class="text-slate-700 dark:text-slate-300 truncate">{{ s.name }}</span>
                   <span class="text-indigo-400 font-bold tabular-nums whitespace-nowrap flex-shrink-0">{{ s.count.toLocaleString('id-ID') }} order</span>
                 </div>
+                <div class="text-[10px] text-slate-500 mb-1">ID: {{ s.serviceId }}</div>
                 <div class="h-1.5 rounded-full overflow-hidden" :style="{ background: 'var(--bg-subtle)' }">
                   <div
                     class="h-full rounded-full bg-gradient-to-r from-indigo-500 to-violet-500 transition-all duration-700"
@@ -128,6 +129,11 @@
                   ></div>
                 </div>
               </div>
+              <a
+                :href="`${panelUrl}?service=${s.serviceId}`"
+                target="_blank" rel="noopener noreferrer"
+                class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[10px] font-semibold transition-colors flex-shrink-0"
+              >Beli</a>
             </div>
           </div>
         </div>
@@ -180,6 +186,8 @@
 <script setup lang="ts">
 import type { RawOrder } from '~/server/api/orders.get'
 import type { RawService } from '~/server/api/services.get'
+
+const panelUrl = useRuntimeConfig().public.panelUrl
 
 const props = defineProps<{
   rawOrders: RawOrder[]
