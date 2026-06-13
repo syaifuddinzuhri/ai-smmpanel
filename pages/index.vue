@@ -16,6 +16,7 @@
       :periods="periods"
       :selectedPlatform="selectedPlatform"
       :selectedPeriod="selectedPeriod"
+      :showPlatformFilter="activeTab !== 'analitik'"
       @update:selectedPlatform="selectedPlatform = $event"
       @update:selectedPeriod="selectedPeriod = $event"
       @resync="resync"
@@ -24,20 +25,20 @@
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
 
       <!-- Tabs -->
-      <div class="flex items-start gap-1 rounded-xl p-1 max-w-full mb-3" :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }">
+      <div class="flex overflow-x-auto scrollbar-hide gap-1 rounded-xl p-1 mb-3" :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }">
         <button
           v-for="tab in mainTabs"
           :key="tab.key"
           :class="[
-            'flex flex-col sm:flex-row items-center sm:items-start gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 flex-1 sm:flex-none text-center sm:text-left',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0',
             activeTab === tab.key
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
               : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-[var(--row-hover)]'
           ]"
           @click="activeTab = tab.key"
         >
-          <Icon :name="tab.icon" class="w-4 h-4 flex-shrink-0 sm:mt-0.5" />
-          <span class="line-clamp-2 leading-snug text-[11px] sm:text-[13px]">{{ tab.label }}</span>
+          <Icon :name="tab.icon" class="w-4 h-4 flex-shrink-0" />
+          <span>{{ tab.label }}</span>
         </button>
       </div>
 
@@ -65,7 +66,7 @@
       <!-- Stat Cards — hanya di tab AI Rekomendasi -->
       <StatCards v-if="activeTab === 'rekomendasi'" :isLoading="isLoading" :stats="stats" />
 
-      <!-- TAB: Monitor Layanan -->
+      <!-- TAB content -->
       <Transition name="tab-fade" mode="out-in">
         <div v-if="activeTab === 'monitor'" key="monitor">
           <MonitorLayanan
@@ -73,6 +74,16 @@
             :isLoading="isLoading"
             :searchQuery="searchQuery"
             :selectedPlatform="selectedPlatform"
+            :selectedPeriod="selectedPeriod"
+          />
+        </div>
+
+        <!-- TAB: Analitik -->
+        <div v-else-if="activeTab === 'analitik'" key="analitik">
+          <AnalitikPanel
+            :rawOrders="rawOrders"
+            :rawServicesList="rawServicesList"
+            :isLoading="isLoading"
             :selectedPeriod="selectedPeriod"
           />
         </div>
@@ -134,7 +145,7 @@ const {
   isLoading, fromCache, apiError, resync,
   selectedPlatform, selectedPeriod, selectedSort,
   searchQuery, platforms, periods, sortOptions, filteredServices,
-  rawServicesList,
+  rawOrders, rawServicesList,
   stats, topPerformers, riskyServices, trendingServices,
   aiInsight, aiInsightLoading, lastUpdate
 } = useServices()
@@ -152,8 +163,9 @@ onMounted(() => {
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
 const mainTabs = [
-  { key: 'monitor', icon: 'heroicons:signal', label: 'Monitoring Layanan' },
-  { key: 'rekomendasi', icon: 'heroicons:cpu-chip', label: 'AI Rekomendasi Layanan' },
+  { key: 'monitor',     icon: 'heroicons:signal',    label: 'Monitoring Layanan' },
+  { key: 'rekomendasi', icon: 'heroicons:cpu-chip',  label: 'AI Rekomendasi' },
+  { key: 'analitik',   icon: 'heroicons:chart-bar',  label: 'Analitik' },
 ]
 </script>
 

@@ -67,8 +67,15 @@
       <!-- Desktop sub-bar -->
       <div class="hidden sm:flex max-w-[1400px] mx-auto px-4 sm:px-6 items-center h-10 gap-0.5">
 
+        <!-- Label saat filter platform disembunyikan -->
+        <div v-if="!showPlatformFilter" class="flex items-center gap-1.5 px-2 py-1">
+          <Icon name="heroicons:chart-bar" class="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+          <span class="text-[12px] font-semibold text-indigo-400">Analitik Layanan</span>
+        </div>
+
         <!-- Pinned platform tabs -->
         <button
+          v-if="showPlatformFilter"
           v-for="p in pinnedPlatforms"
           :key="p.label"
           :class="[
@@ -85,7 +92,7 @@
         </button>
 
         <!-- Overflow dropdown -->
-        <div ref="overflowRef" class="relative">
+        <div v-if="showPlatformFilter" ref="overflowRef" class="relative">
           <button
             :class="[
               'flex items-center gap-1.5 px-3 py-1 rounded-md text-[12px] font-medium transition-all whitespace-nowrap',
@@ -154,8 +161,14 @@
       <!-- Mobile sub-bar -->
       <div class="sm:hidden flex items-center gap-2 px-4 h-11">
 
+        <!-- Label analitik mobile -->
+        <div v-if="!showPlatformFilter" class="flex items-center gap-1.5 flex-1">
+          <Icon name="heroicons:chart-bar" class="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
+          <span class="text-[12px] font-semibold text-indigo-400">Analitik Layanan</span>
+        </div>
+
         <!-- Custom platform dropdown -->
-        <div ref="mobileRef" class="relative flex-1">
+        <div v-if="showPlatformFilter" ref="mobileRef" class="relative flex-1">
           <button
             class="w-full flex items-center gap-2 rounded-lg px-2.5 py-1.5 text-[12px] text-slate-600 dark:text-slate-300"
             :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
@@ -233,6 +246,7 @@ const props = withDefaults(defineProps<{
   selectedPeriod?: string
   showSubBar?: boolean
   showResync?: boolean
+  showPlatformFilter?: boolean
 }>(), {
   searchQuery: '',
   platforms: () => [],
@@ -241,6 +255,7 @@ const props = withDefaults(defineProps<{
   selectedPeriod: '',
   showSubBar: true,
   showResync: true,
+  showPlatformFilter: true,
 })
 const emit = defineEmits(['update:searchQuery', 'update:selectedPlatform', 'update:selectedPeriod', 'resync'])
 

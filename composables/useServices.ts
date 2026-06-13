@@ -215,7 +215,7 @@ export const useServices = () => {
   watch(liveServices, () => { fetchInsight() }, { deep: false })
 
   return {
-    services, rawServicesList, isLoading, fromCache, apiError, fetchOrders, resync,
+    services, rawOrders, rawServicesList, isLoading, fromCache, apiError, fetchOrders, resync,
     selectedPlatform, selectedPeriod, selectedSort,
     searchQuery, platforms, periods, sortOptions, filteredServices,
     stats, topPerformers, riskyServices, trendingServices,

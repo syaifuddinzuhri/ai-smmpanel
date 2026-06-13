@@ -24,6 +24,56 @@
       </div>
     </div>
 
+    <!-- Filter bar -->
+    <div v-if="!isLoading && services.length > 0" class="flex flex-wrap items-center gap-1.5 mb-3">
+      <!-- Sort dropdown -->
+      <div class="relative flex items-center flex-shrink-0">
+        <Icon name="heroicons:bars-arrow-down" class="absolute left-2.5 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+        <select
+          v-model="selectedSort"
+          class="pl-7 pr-7 py-1.5 rounded-full text-[11px] font-semibold text-slate-600 dark:text-slate-300 outline-none cursor-pointer appearance-none transition-all"
+          :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
+        >
+          <option v-for="o in sortOptions" :key="o.value" :value="o.value">{{ o.label }}</option>
+        </select>
+        <Icon name="heroicons:chevron-down" class="absolute right-2 w-3 h-3 text-slate-500 pointer-events-none" />
+      </div>
+
+      <div class="w-px h-4 bg-slate-300 dark:bg-white/10 flex-shrink-0"></div>
+
+      <!-- Refill / Cancel toggles -->
+      <button
+        :class="[
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+          onlyRefill ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' : 'border-transparent text-slate-500 hover:bg-[var(--row-hover)]'
+        ]"
+        @click="onlyRefill = !onlyRefill"
+      >
+        <Icon name="heroicons:arrow-path" class="w-3 h-3" />
+        Refill
+      </button>
+      <button
+        :class="[
+          'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
+          onlyCancel ? 'bg-blue-500/15 border-blue-500/30 text-blue-400' : 'border-transparent text-slate-500 hover:bg-[var(--row-hover)]'
+        ]"
+        @click="onlyCancel = !onlyCancel"
+      >
+        <Icon name="heroicons:x-mark" class="w-3 h-3" />
+        Cancel
+      </button>
+
+      <!-- Reset -->
+      <button
+        v-if="onlyRefill || onlyCancel || selectedSort"
+        class="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] text-slate-500 hover:text-red-400 transition-colors"
+        @click="onlyRefill = false; onlyCancel = false; selectedSort = ''"
+      >
+        <Icon name="heroicons:x-mark" class="w-3 h-3" />
+        Reset
+      </button>
+    </div>
+
     <!-- Loading skeleton -->
     <div v-if="isLoading" class="space-y-4">
       <div v-for="i in 3" :key="i" class="card p-5 space-y-3">
@@ -185,6 +235,39 @@ const props = defineProps<{
   selectedPeriod?: string
 }>()
 
+const onlyRefill = ref(false)
+const onlyCancel = ref(false)
+const selectedSort = ref('')
+
+const sortOptions = [
+  { value: '',          label: 'Urutan Default' },
+  { value: 'name_asc',  label: 'Nama A → Z' },
+  { value: 'name_desc', label: 'Nama Z → A' },
+  { value: 'price_asc', label: 'Harga Termurah' },
+  { value: 'price_desc',label: 'Harga Termahal' },
+  { value: 'min_asc',   label: 'Min Order ↑' },
+  { value: 'min_desc',  label: 'Min Order ↓' },
+  { value: 'max_asc',   label: 'Max Order ↑' },
+  { value: 'max_desc',  label: 'Max Order ↓' },
+]
+
+function sortServices(list: RawService[]): RawService[] {
+  if (!selectedSort.value) return list
+  return [...list].sort((a, b) => {
+    switch (selectedSort.value) {
+      case 'name_asc':   return a.name.localeCompare(b.name)
+      case 'name_desc':  return b.name.localeCompare(a.name)
+      case 'price_asc':  return Number(a.rate) - Number(b.rate)
+      case 'price_desc': return Number(b.rate) - Number(a.rate)
+      case 'min_asc':    return Number(a.min) - Number(b.min)
+      case 'min_desc':   return Number(b.min) - Number(a.min)
+      case 'max_asc':    return Number(a.max) - Number(b.max)
+      case 'max_desc':   return Number(b.max) - Number(a.max)
+      default:           return 0
+    }
+  })
+}
+
 const PLATFORM_ORDER = ['Instagram', 'TikTok', 'YouTube', 'Facebook', 'Twitter/X', 'Shopee', 'Spotify', 'Telegram', 'Google', 'Threads', 'Lain-lain']
 
 function detectPlatform(name: string): { platform: string; icon: string } {
@@ -214,6 +297,9 @@ const filteredGroups = computed(() => {
     )
   }
 
+  if (onlyRefill.value) list = list.filter(s => s.refill)
+  if (onlyCancel.value) list = list.filter(s => s.cancel)
+
   const grouped = new Map<string, { platform: string; icon: string; services: RawService[] }>()
   for (const svc of list) {
     const { platform, icon } = detectPlatform(svc.name)
@@ -224,6 +310,7 @@ const filteredGroups = computed(() => {
   let groups = PLATFORM_ORDER
     .map(p => grouped.get(p))
     .filter((g): g is { platform: string; icon: string; services: RawService[] } => !!g && g.services.length > 0)
+    .map(g => ({ ...g, services: sortServices(g.services) }))
 
   if (props.selectedPlatform !== 'Semua') {
     groups = groups.filter(g => g.platform === props.selectedPlatform)
