@@ -134,7 +134,7 @@
         </div>
 
         <!-- Column headers (desktop) -->
-        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px_140px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
+        <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_148px_180px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 1000</span>
           <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
@@ -146,7 +146,7 @@
         <!-- Service rows -->
         <div class="divide-y divide-slate-100 dark:divide-white/[0.03]">
           <div v-for="svc in group.services" :key="svc.service"
-            class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_148px_140px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
+            class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_148px_180px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
 
             <!-- Name + meta -->
             <div class="min-w-0 mb-2 md:mb-0">
@@ -196,14 +196,24 @@
                   ✕ Cancel
                 </span>
               </div>
-              <!-- Mobile: Favorit + Beli + Detail -->
+              <!-- Mobile: Favorit + Compare + Beli + Detail -->
               <div class="md:hidden flex items-center gap-1.5 ml-auto">
                 <button
                   :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0', isWatched(svc.service) ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400']"
                   :style="{ background: isWatched(svc.service) ? 'rgba(245,158,11,0.18)' : 'var(--bg-input)', border: `1px solid ${isWatched(svc.service) ? 'rgba(245,158,11,0.3)' : 'var(--border)'}` }"
                   @click.prevent="toggleWatch(svc.service)"
                 >
-                  <Icon :name="isWatched(svc.service) ? 'heroicons:star-solid' : 'heroicons:star'" class="w-3.5 h-3.5" />
+                  <Icon :name="isWatched(svc.service) ? 'heroicons:star-20-solid' : 'heroicons:star'" class="w-3.5 h-3.5" />
+                </button>
+                <button
+                  :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0',
+                    isComparing(svc.service) ? 'text-indigo-400' : (!canCompare && !isComparing(svc.service)) ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-indigo-400']"
+                  :style="{ background: isComparing(svc.service) ? 'rgba(99,102,241,0.18)' : 'var(--bg-input)', border: `1px solid ${isComparing(svc.service) ? 'rgba(99,102,241,0.3)' : 'var(--border)'}` }"
+                  :disabled="!canCompare && !isComparing(svc.service)"
+                  title="Tambah ke komparasi (maks. 3)"
+                  @click.prevent="toggleCompare(svc.service)"
+                >
+                  <Icon :name="isComparing(svc.service) ? 'heroicons:check' : 'heroicons:arrows-right-left'" class="w-3.5 h-3.5" />
                 </button>
                 <a
                   :href="`${panelUrl}?service=${svc.service}`"
@@ -218,14 +228,24 @@
               </div>
             </div>
 
-            <!-- Desktop: Favorit + Beli + Detail -->
+            <!-- Desktop: Favorit + Compare + Beli + Detail -->
             <div class="hidden md:flex items-center justify-center gap-1.5">
               <button
                 :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0', isWatched(svc.service) ? 'text-amber-400' : 'text-slate-400 hover:text-amber-400']"
                 :style="{ background: isWatched(svc.service) ? 'rgba(245,158,11,0.18)' : 'var(--bg-input)', border: `1px solid ${isWatched(svc.service) ? 'rgba(245,158,11,0.3)' : 'var(--border)'}` }"
                 @click.prevent="toggleWatch(svc.service)"
               >
-                <Icon :name="isWatched(svc.service) ? 'heroicons:star' : 'heroicons:star'" class="w-3.5 h-3.5" />
+                <Icon :name="isWatched(svc.service) ? 'heroicons:star-20-solid' : 'heroicons:star'" class="w-3.5 h-3.5" />
+              </button>
+              <button
+                :class="['w-7 h-7 rounded-lg flex items-center justify-center transition-all flex-shrink-0',
+                  isComparing(svc.service) ? 'text-indigo-400' : (!canCompare && !isComparing(svc.service)) ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-indigo-400']"
+                :style="{ background: isComparing(svc.service) ? 'rgba(99,102,241,0.18)' : 'var(--bg-input)', border: `1px solid ${isComparing(svc.service) ? 'rgba(99,102,241,0.3)' : 'var(--border)'}` }"
+                :disabled="!canCompare && !isComparing(svc.service)"
+                title="Tambah ke komparasi (maks. 3)"
+                @click.prevent="toggleCompare(svc.service)"
+              >
+                <Icon :name="isComparing(svc.service) ? 'heroicons:check' : 'heroicons:arrows-right-left'" class="w-3.5 h-3.5" />
               </button>
               <a
                 :href="`${panelUrl}?service=${svc.service}`"
@@ -265,6 +285,7 @@ const props = defineProps<{
 }>()
 
 const { toggle: toggleWatch, isWatched, count: watchlistCount } = useWatchlist()
+const { toggle: toggleCompare, isSelected: isComparing, canAdd: canCompare } = useComparison()
 
 const onlyRefill = ref(false)
 const onlyCancel = ref(false)

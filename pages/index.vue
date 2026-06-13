@@ -132,6 +132,44 @@
         <Icon name="heroicons:chevron-up" class="w-4 h-4" />
       </button>
     </Transition>
+
+    <!-- Floating comparison bar -->
+    <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 pointer-events-none">
+      <Transition name="slide-up">
+        <div
+          v-if="comparisonCount > 0"
+          class="pointer-events-auto flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2.5 rounded-2xl shadow-2xl shadow-black/30"
+          :style="{ background: 'var(--bg-card)', border: '1px solid var(--border)' }"
+        >
+          <Icon name="heroicons:arrows-right-left" class="w-4 h-4 text-indigo-400 flex-shrink-0" />
+          <span class="text-[12px] font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
+            {{ comparisonCount }} layanan dipilih
+          </span>
+          <button
+            class="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[12px] font-semibold whitespace-nowrap shadow-lg shadow-indigo-500/25 disabled:opacity-50"
+            :disabled="comparisonCount < 2"
+            @click="showComparison = true"
+          >
+            Bandingkan
+          </button>
+          <button
+            class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors flex-shrink-0"
+            :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
+            @click="clearComparison"
+          >
+            <Icon name="heroicons:x-mark" class="w-3.5 h-3.5" />
+          </button>
+        </div>
+      </Transition>
+    </div>
+
+    <!-- Comparison Modal -->
+    <KomparasiModal
+      v-if="showComparison"
+      :allServices="rawServicesList"
+      :ids="comparisonIds"
+      @close="showComparison = false"
+    />
   </div>
 </template>
 
@@ -151,6 +189,9 @@ const {
 } = useServices()
 
 const activeTab = ref('monitor')
+
+const { ids: comparisonIds, clear: clearComparison, count: comparisonCount } = useComparison()
+const showComparison = ref(false)
 
 const showScrollTop = ref(false)
 
@@ -188,5 +229,15 @@ const mainTabs = [
 .scroll-top-leave-to {
   opacity: 0;
   transform: translateY(8px);
+}
+
+.slide-up-enter-active,
+.slide-up-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.slide-up-enter-from,
+.slide-up-leave-to {
+  opacity: 0;
+  transform: translateY(12px);
 }
 </style>
