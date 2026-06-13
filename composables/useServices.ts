@@ -84,13 +84,18 @@ export const useServices = () => {
   )
 
   const platforms = [
-    { label: 'Semua', icon: null },
-    { label: 'Instagram', icon: '📸' },
-    { label: 'TikTok', icon: '🎵' },
-    { label: 'Facebook', icon: '👍' },
-    { label: 'YouTube', icon: '▶️' },
-    { label: 'Twitter/X', icon: '🐦' },
-    { label: 'Shopee', icon: '🛍️' },
+    { label: 'Semua',     icon: null },
+    { label: 'Instagram', icon: 'logos:instagram-icon' },
+    { label: 'TikTok',    icon: 'logos:tiktok-icon' },
+    { label: 'Facebook',  icon: 'logos:facebook' },
+    { label: 'YouTube',   icon: 'logos:youtube-icon' },
+    { label: 'Twitter/X', icon: 'logos:twitter' },
+    { label: 'Shopee',    icon: 'simple-icons:shopee' },
+    { label: 'Spotify',   icon: 'logos:spotify' },
+    { label: 'Telegram',  icon: 'logos:telegram' },
+    { label: 'Google',    icon: 'logos:google' },
+    { label: 'Threads',   icon: 'logos:thread' },
+    { label: 'Lain-lain', icon: 'logos:other' },
   ]
 
   const periods = ['6J', '24J', '48J', '7 Hari']

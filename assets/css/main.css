@@ -2,14 +2,56 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Theme tokens ───────────────────────────────────────────── */
+:root {
+  --bg-page:    #f0f4ff;
+  --bg-header:  rgba(255,255,255,0.95);
+  --bg-sub:     rgba(248,249,255,0.97);
+  --bg-card:    rgba(255,255,255,0.85);
+  --bg-a60:     rgba(255,255,255,0.60);
+  --bg-a70:     rgba(255,255,255,0.75);
+  --bg-a80:     rgba(255,255,255,0.85);
+  --bg-a90:     rgba(255,255,255,0.92);
+  --bg-input:   rgba(0,0,0,0.04);
+  --bg-subtle:  rgba(0,0,0,0.05);
+  --border:     rgba(0,0,0,0.08);
+  --border-sub: rgba(0,0,0,0.06);
+  --border-str: rgba(0,0,0,0.12);
+  --row-hover:  rgba(0,0,0,0.04);
+  --btn-hover:  rgba(0,0,0,0.08);
+}
+
+.dark {
+  --bg-page:    #0b0d1a;
+  --bg-header:  rgba(11,13,26,0.95);
+  --bg-sub:     rgba(13,16,32,0.90);
+  --bg-card:    rgba(17,24,39,0.80);
+  --bg-a60:     rgba(17,24,39,0.60);
+  --bg-a70:     rgba(17,24,39,0.70);
+  --bg-a80:     rgba(17,24,39,0.80);
+  --bg-a90:     rgba(17,24,39,0.90);
+  --bg-input:   rgba(255,255,255,0.04);
+  --bg-subtle:  rgba(255,255,255,0.03);
+  --border:     rgba(255,255,255,0.06);
+  --border-sub: rgba(255,255,255,0.04);
+  --border-str: rgba(255,255,255,0.10);
+  --row-hover:  rgba(255,255,255,0.04);
+  --btn-hover:  rgba(255,255,255,0.08);
+}
+
 @layer base {
   html { scroll-behavior: smooth; }
-  body { @apply bg-[#0b0d1a] text-slate-200 font-sans antialiased min-h-screen; }
+  body {
+    @apply font-sans antialiased min-h-screen text-slate-800 dark:text-slate-200;
+    background-color: var(--bg-page);
+  }
 }
 
 @layer components {
   .card {
-    @apply bg-[#111827]/80 border border-white/[0.07] rounded-xl backdrop-blur-sm;
+    @apply rounded-xl backdrop-blur-sm;
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
   }
   .badge-green {
     @apply inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20;
@@ -30,8 +72,10 @@
     @apply btn-tab bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/30;
   }
   .btn-tab-inactive {
-    @apply btn-tab text-slate-400 hover:text-slate-200 hover:bg-white/5;
+    @apply btn-tab text-slate-500 hover:text-slate-700 dark:hover:text-slate-200;
+    background-color: transparent;
   }
+  .btn-tab-inactive:hover { background-color: var(--row-hover); }
   .period-btn {
     @apply px-2.5 py-1 rounded-md text-[11px] font-bold transition-all whitespace-nowrap;
   }
@@ -39,8 +83,9 @@
     @apply period-btn bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-md shadow-indigo-500/30;
   }
   .period-inactive {
-    @apply period-btn text-slate-500 hover:bg-white/5 hover:text-slate-300;
+    @apply period-btn text-slate-500 dark:hover:text-slate-300 hover:text-slate-700;
   }
+  .period-inactive:hover { background-color: var(--row-hover); }
   .score-bar {
     @apply h-1.5 rounded-full bg-gradient-to-r from-indigo-500 to-violet-500;
   }
@@ -51,7 +96,7 @@
     @apply w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0;
   }
   .skeleton {
-    @apply h-4 bg-white/5 rounded animate-pulse;
+    @apply h-4 rounded animate-pulse bg-slate-200/80 dark:bg-white/5;
   }
 }
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="min-h-screen bg-[#0b0d1a] relative overflow-x-hidden">
+  <div class="min-h-screen relative overflow-x-hidden" :style="{ background: 'var(--bg-page)' }">
     <!-- Ambient glow -->
     <div class="pointer-events-none fixed top-[-5%] left-[15%] w-[800px] h-[600px] z-0 opacity-50"
       style="background: radial-gradient(ellipse, rgba(99,102,241,0.07) 0%, transparent 65%)"></div>
@@ -23,21 +23,42 @@
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-6 py-4 relative z-[1]">
 
-      <!-- Tab Switcher -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-1 bg-[#111827]/60 border border-white/[0.06] rounded-xl p-1 mb-5 w-full sm:w-fit">
+      <!-- Tabs -->
+      <div class="flex items-center gap-1 rounded-xl p-1 overflow-x-auto scrollbar-hide max-w-full mb-3" :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }">
         <button
           v-for="tab in mainTabs"
           :key="tab.key"
           :class="[
-            'flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 whitespace-nowrap',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-[13px] font-semibold transition-all duration-200 whitespace-nowrap flex-shrink-0',
             activeTab === tab.key
               ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/25'
-              : 'text-slate-500 hover:text-slate-300 hover:bg-white/[0.04]'
+              : 'text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 hover:bg-[var(--row-hover)]'
           ]"
           @click="activeTab = tab.key"
         >
-          <span>{{ tab.icon }}</span>
+          <Icon :name="tab.icon" class="w-4 h-4 flex-shrink-0" />
           <span>{{ tab.label }}</span>
+        </button>
+      </div>
+
+      <!-- Search -->
+      <div class="relative mb-5 max-w-full">
+        <Icon name="heroicons:magnifying-glass" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500 pointer-events-none" />
+        <input
+          :value="searchQuery"
+          :disabled="isLoading"
+          type="text"
+          placeholder="Cari nama atau ID layanan..."
+          class="w-full rounded-xl py-2 pl-9 pr-8 text-[13px] text-slate-700 dark:text-slate-200 outline-none transition-all focus:border-indigo-500/40 placeholder:text-slate-400 dark:placeholder:text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+          :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }"
+          @input="searchQuery = ($event.target as HTMLInputElement).value"
+        />
+        <button
+          v-if="searchQuery"
+          class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors"
+          @click="searchQuery = ''"
+        >
+          <Icon name="heroicons:x-mark" class="w-3.5 h-3.5" />
         </button>
       </div>
 
@@ -52,6 +73,7 @@
             :isLoading="isLoading"
             :searchQuery="searchQuery"
             :selectedPlatform="selectedPlatform"
+            :selectedPeriod="selectedPeriod"
           />
         </div>
 
@@ -64,6 +86,8 @@
               :lastUpdate="lastUpdate"
               :sortOptions="sortOptions"
               :selectedSort="selectedSort"
+              :selectedPeriod="selectedPeriod"
+              class="order-2 xl:order-1"
               @update:selectedSort="selectedSort = $event"
             />
             <AiSidebar
@@ -73,14 +97,15 @@
               :topPerformers="topPerformers"
               :riskyServices="riskyServices"
               :trendingServices="trendingServices"
+              class="order-1 xl:order-2"
             />
           </div>
         </div>
       </Transition>
 
       <!-- Footer -->
-      <div class="mt-5 pb-5 flex items-center justify-between text-[11px] text-slate-700 border-t border-white/[0.04] pt-3">
-        <span>SmmBuzzer AI · Multi-Factor Scoring Engine v1.0</span>
+      <div class="mt-5 pb-5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-700 pt-3" :style="{ borderTop: '1px solid var(--border-sub)' }">
+        <span>SmmBuzzer · Dashboard Monitoring</span>
         <span v-if="!isLoading">Update terakhir: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
       </div>
     </main>
@@ -93,9 +118,7 @@
         class="fixed bottom-6 right-6 z-50 w-10 h-10 rounded-full bg-indigo-600/90 hover:bg-indigo-500 border border-indigo-500/40 shadow-lg shadow-indigo-500/20 flex items-center justify-center text-white backdrop-blur-sm transition-colors duration-200"
         aria-label="Scroll to top"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="18 15 12 9 6 15" />
-        </svg>
+        <Icon name="heroicons:chevron-up" class="w-4 h-4" />
       </button>
     </Transition>
   </div>
@@ -103,7 +126,7 @@
 
 <script setup lang="ts">
 useHead({
-  title: 'AI Rekomendasi Layanan — SmmBuzzer',
+  title: 'Monitoring Layanan - SmmBuzzer',
   meta: [{ name: 'description', content: 'AI-powered SMM panel service recommendation dashboard' }]
 })
 
@@ -116,7 +139,7 @@ const {
   aiInsight, aiInsightLoading, lastUpdate
 } = useServices()
 
-const activeTab = ref('rekomendasi')
+const activeTab = ref('monitor')
 
 const showScrollTop = ref(false)
 
@@ -129,8 +152,8 @@ onMounted(() => {
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
 const mainTabs = [
-  { key: 'monitor', icon: '📡', label: 'Monitor Layanan' },
-  { key: 'rekomendasi', icon: '🤖', label: 'AI Rekomendasi Layanan' },
+  { key: 'monitor', icon: 'heroicons:signal', label: 'Monitoring Layanan' },
+  { key: 'rekomendasi', icon: 'heroicons:cpu-chip', label: 'AI Rekomendasi Layanan' },
 ]
 </script>
 

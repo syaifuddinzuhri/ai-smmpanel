@@ -29,16 +29,27 @@ interface ServicesApiResponse {
   error?: string
 }
 
+interface ResyncApiResponse {
+  orders:   { data: RawOrder[];   updatedAt: string | null; total: number }
+  services: { data: RawService[]; updatedAt: string | null; total: number }
+  syncedAt: string
+  errors?: string[]
+}
+
 function detectPlatform(name: string, link = ''): { platform: string; icon: string } {
   const n = name.toLowerCase()
   const l = link.toLowerCase()
-  if (n.includes('instagram') || l.includes('instagram.com')) return { platform: 'Instagram', icon: '📸' }
-  if (n.includes('tiktok') || l.includes('tiktok.com')) return { platform: 'TikTok', icon: '🎵' }
-  if (n.includes('youtube') || l.includes('youtube.com') || l.includes('youtu.be')) return { platform: 'YouTube', icon: '▶️' }
-  if (n.includes('facebook') || l.includes('facebook.com') || l.includes('fb.com')) return { platform: 'Facebook', icon: '👍' }
-  if (n.includes('twitter') || n.includes('tweet') || l.includes('twitter.com') || l.includes('x.com')) return { platform: 'Twitter/X', icon: '🐦' }
-  if (n.includes('shopee') || l.includes('shopee')) return { platform: 'Shopee', icon: '🛍️' }
-  return { platform: 'Lainnya', icon: '🌐' }
+  if (n.includes('instagram') || l.includes('instagram.com'))                         return { platform: 'Instagram', icon: 'logos:instagram-icon' }
+  if (n.includes('tiktok') || l.includes('tiktok.com'))                               return { platform: 'TikTok',    icon: 'logos:tiktok-icon' }
+  if (n.includes('youtube') || l.includes('youtube.com') || l.includes('youtu.be'))   return { platform: 'YouTube',   icon: 'logos:youtube-icon' }
+  if (n.includes('facebook') || l.includes('facebook.com') || l.includes('fb.com'))   return { platform: 'Facebook',  icon: 'logos:facebook' }
+  if (n.includes('twitter') || n.includes('tweet') || l.includes('twitter.com') || l.includes('x.com')) return { platform: 'Twitter/X', icon: 'logos:twitter' }
+  if (n.includes('shopee')  || l.includes('shopee'))                                  return { platform: 'Shopee',    icon: 'simple-icons:shopee' }
+  if (n.includes('spotify')  || l.includes('spotify.com'))                              return { platform: 'Spotify',   icon: 'logos:spotify' }
+  if (n.includes('telegram') || l.includes('t.me'))                                    return { platform: 'Telegram',  icon: 'logos:telegram' }
+  if (n.includes('google')   || n.includes('gmail') || n.includes('play store') || l.includes('google.com')) return { platform: 'Google', icon: 'logos:google' }
+  if (n.includes('thread')   || l.includes('threads.net'))                             return { platform: 'Threads',   icon: 'logos:thread' }
+  return { platform: 'Lain-lain', icon: 'logos:other' }
 }
 
 function mapCategory(type: string): string {
@@ -199,15 +210,34 @@ export const useOrders = (period?: Ref<string>) => {
     }
   }
 
-  const resync = async () => {
+  const resync = async (p?: string) => {
     isLoading.value = true
-    await Promise.all([fetchOrders(), fetchServices()])
+    apiError.value = null
+    try {
+      const res = await $fetch<ResyncApiResponse>('/api/resync', {
+        method: 'POST',
+        body: { period: p ?? period?.value ?? '7 Hari' },
+      })
+      rawOrders.value = res.orders.data ?? []
+      rawServicesList.value = res.services.data ?? []
+      fromCache.value = false
+      updatedAt.value = res.syncedAt
+      lastUpdate.value = new Date(res.syncedAt).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+      if (res.errors?.length) apiError.value = res.errors.join('; ')
+    } catch (err: unknown) {
+      apiError.value = err instanceof Error ? err.message : 'Resync gagal'
+    } finally {
+      isLoading.value = false
+    }
+  }
+
+  // Auto-resync saat periode berubah
+  if (period) {
+    watch(period, (p) => resync(p), { immediate: false })
   }
 
   onMounted(async () => {
     await Promise.all([fetchOrders(), fetchServices()])
-    const timer = setInterval(fetchOrders, 3 * 60 * 1000)
-    onUnmounted(() => clearInterval(timer))
   })
 
   return { services, rawOrders, rawServicesList, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders, fetchServices, resync }

@@ -4,22 +4,22 @@ export default defineNuxtConfig({
 
   runtimeConfig: {
     apiBaseUrl: process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com',
-    apiAdminKey: process.env.NUXT_API_ADMIN_KEY || '',  // Admin API → /adminapi/v2/orders
-    apiV2Key: process.env.NUXT_API_V2_KEY || '',        // User/Reseller API → /api/v2
+    apiAdminKey: process.env.NUXT_API_ADMIN_KEY || '',         // Admin API → /adminapi/v2/orders
+    apiV2Key: process.env.NUXT_API_V2_KEY || '',               // User/Reseller API → /api/v2
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
     public: {
       panelUrl: process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com', // URL panel untuk tombol Beli
     },
   },
 
-  nitro: {
-    storage: {
-      data: { driver: 'fs', base: './.data/kv' },
-    },
-  },
   modules: ['@nuxtjs/tailwindcss'],
   app: {
     head: {
+      script: [
+        {
+          innerHTML: `!function(){var t=localStorage.getItem('theme');document.documentElement.classList.toggle('dark',t!=='light')}()`,
+        }
+      ],
       title: 'AI Rekomendasi Layanan — SmmBuzzer',
       meta: [
         { charset: 'utf-8' },

@@ -1,3 +1,5 @@
+import { readCache, writeCache } from '../utils/db'
+
 export interface RawOrder {
   id: number
   external_id?: string
@@ -23,110 +25,88 @@ interface ApiResponse {
   error_code?: number
 }
 
-interface CacheEntry {
-  list: RawOrder[]
-  updatedAt: string
+function log(level: 'INFO' | 'WARN' | 'ERROR', msg: string, extra?: Record<string, unknown>) {
+  const prefix = `[${new Date().toISOString()}] [orders] [${level}]`
+  const fn = level === 'ERROR' ? console.error : level === 'WARN' ? console.warn : console.log
+  extra ? fn(prefix, msg, JSON.stringify(extra)) : fn(prefix, msg)
 }
 
-function log(level: 'INFO' | 'WARN' | 'ERROR', msg: string, extra?: Record<string, unknown>) {
-  const ts = new Date().toISOString()
-  const prefix = `[${ts}] [orders.get] [${level}]`
-  if (extra !== undefined) {
-    console[level === 'ERROR' ? 'error' : level === 'WARN' ? 'warn' : 'log'](`${prefix} ${msg}`, JSON.stringify(extra, null, 2))
-  } else {
-    console[level === 'ERROR' ? 'error' : level === 'WARN' ? 'warn' : 'log'](`${prefix} ${msg}`)
+export async function fetchOrdersFromApi(createdFrom?: number): Promise<{ list: RawOrder[]; updatedAt: string }> {
+  const config = useRuntimeConfig()
+  const baseUrl = config.apiBaseUrl
+  const pageLimit = 1000
+  const cf = createdFrom ?? Math.floor(Date.now() / 1000) - 7 * 24 * 3600
+  const allOrders: RawOrder[] = []
+  let offset = 0
+  let page = 0
+
+  log('INFO', `Fetch orders dari ${baseUrl}`, { createdFrom: cf, pageLimit })
+
+  while (true) {
+    page++
+    const url = `${baseUrl}/adminapi/v2/orders?limit=${pageLimit}&offset=${offset}&created_from=${cf}&sort=date-desc`
+
+    let res: ApiResponse
+    try {
+      res = await $fetch<ApiResponse>(url, {
+        headers: { 'Content-Type': 'application/json', 'X-Api-Key': String(config.apiAdminKey) },
+        timeout: 20000,
+      })
+    } catch (err: unknown) {
+      log('WARN', `Halaman ${page} gagal — berhenti di ${allOrders.length} order`, {
+        message: err instanceof Error ? err.message : String(err),
+      })
+      break
+    }
+
+    if (res.error_code || res.error_message) {
+      log('ERROR', 'API error', { error_code: res.error_code, error_message: res.error_message })
+      break
+    }
+
+    const pageData = res.data?.list ?? []
+    allOrders.push(...pageData)
+    log('INFO', `Halaman ${page} selesai`, { records: pageData.length, total: allOrders.length })
+
+    if (pageData.length < pageLimit || !res.pagination?.next_page_href) break
+    offset += pageLimit
   }
+
+  const updatedAt = new Date().toISOString()
+  log('INFO', 'Fetch selesai', { total: allOrders.length, pages: page })
+  await writeCache('orders', allOrders)
+  return { list: allOrders, updatedAt }
 }
 
 export default defineEventHandler(async () => {
   const config = useRuntimeConfig()
-  const storage = useStorage('data')
 
   if (!config.apiAdminKey) {
-    log('WARN', 'Admin API key (NUXT_API_ADMIN_KEY) tidak dikonfigurasi — returning cache')
-    const cached = await storage.getItem<CacheEntry>('orders:latest')
+    const cached = await readCache<RawOrder[]>('orders')
     return {
-      data: cached?.list ?? [],
-      updatedAt: cached?.updatedAt ?? null,
+      data: cached?.data ?? [],
+      updatedAt: cached?.fetchedAt ?? null,
       fromCache: true,
-      total: cached?.list?.length ?? 0,
+      total: cached?.count ?? 0,
       error: 'Admin API key tidak dikonfigurasi',
     }
   }
 
-  const baseUrl = config.apiBaseUrl
-  log('INFO', `Mulai fetch orders dari ${baseUrl}`)
+  // Serve dari SQLite jika sudah ada data — fetch hanya lewat Resync
+  const cached = await readCache<RawOrder[]>('orders')
+  if (cached) {
+    log('INFO', `Serve dari SQLite`, { total: cached.count, fetchedAt: cached.fetchedAt })
+    return { data: cached.data, updatedAt: cached.fetchedAt, fromCache: true, total: cached.count }
+  }
 
+  // Bootstrap: DB kosong (pertama kali), fetch sekali ke API
+  log('INFO', 'DB kosong — bootstrap fetch pertama')
   try {
-    const allOrders: RawOrder[] = []
-    const pageLimit = 1000
-    let offset = 0
-    let hasMore = true
-    let page = 0
-
-    while (hasMore) {
-      page++
-      const url = `${baseUrl}/adminapi/v2/orders?limit=${pageLimit}&offset=${offset}`
-      log('INFO', `Fetch halaman ${page}`, { url, offset, limit: pageLimit })
-
-      const startTime = Date.now()
-      const res = await $fetch<ApiResponse>(url, {
-        headers: { 'Content-Type': 'application/json', 'X-Api-Key': String(config.apiAdminKey) },
-        timeout: 12000,
-      })
-      const elapsed = Date.now() - startTime
-
-      if (res.error_code || res.error_message) {
-        log('ERROR', 'API mengembalikan error', {
-          error_code: res.error_code,
-          error_message: res.error_message,
-          url,
-        })
-      }
-
-      const pageData = res.data?.list ?? []
-      log('INFO', `Halaman ${page} selesai`, {
-        elapsed_ms: elapsed,
-        records: pageData.length,
-        has_next: !!res.pagination?.next_page_href,
-      })
-
-      allOrders.push(...pageData)
-      hasMore = pageData.length === pageLimit && !!res.pagination?.next_page_href
-      offset += pageLimit
-    }
-
-    const updatedAt = new Date().toISOString()
-    log('INFO', `Fetch selesai`, { total_orders: allOrders.length, pages: page, updatedAt })
-
-    await storage.setItem<CacheEntry>('orders:latest', { list: allOrders, updatedAt })
-
-    const history = (await storage.getItem<CacheEntry[]>('orders:history')) ?? []
-    history.push({ list: allOrders, updatedAt })
-    if (history.length > 48) history.splice(0, history.length - 48)
-    await storage.setItem('orders:history', history)
-
-    return { data: allOrders, updatedAt, fromCache: false, total: allOrders.length }
+    const { list, updatedAt } = await fetchOrdersFromApi()
+    return { data: list, updatedAt, fromCache: false, total: list.length }
   } catch (err: unknown) {
-    const isError = err instanceof Error
-    log('ERROR', 'Fetch gagal — fallback ke cache', {
-      message: isError ? err.message : String(err),
-      name: isError ? err.name : undefined,
-      stack: isError ? err.stack : undefined,
-      cause: isError && err.cause ? String(err.cause) : undefined,
-    })
-
-    const cached = await storage.getItem<CacheEntry>('orders:latest')
-    log('INFO', `Mengembalikan cache`, {
-      cached_total: cached?.list?.length ?? 0,
-      cached_at: cached?.updatedAt ?? null,
-    })
-
-    return {
-      data: cached?.list ?? [],
-      updatedAt: cached?.updatedAt ?? null,
-      fromCache: true,
-      total: cached?.list?.length ?? 0,
-    }
+    const msg = err instanceof Error ? err.message : String(err)
+    log('ERROR', 'Bootstrap fetch gagal', { message: msg })
+    return { data: [], updatedAt: null, fromCache: false, total: 0, error: msg }
   }
 })
