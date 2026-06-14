@@ -26,7 +26,7 @@ const env = loadEnv(path.join(__dirname, '.env'))
 module.exports = {
   apps: [
     {
-      name: 'smm-panel-ai',
+      name: env.PM2_APP_NAME || 'smm-panel-ai',
       script: '.output/server/index.mjs',
       instances: 1,
       exec_mode: 'fork',
