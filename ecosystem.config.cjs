@@ -32,7 +32,6 @@ module.exports = {
       exec_mode: 'fork',
       env: {
         NODE_ENV: 'production',
-        PORT: 4731,
         ...env,
       },
       autorestart: true,
