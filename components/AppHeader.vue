@@ -7,14 +7,14 @@
         <div class="flex items-center gap-3 flex-shrink-0">
           <div class="relative">
             <div class="w-8 h-8 p-1 rounded-lg overflow-hidden shadow-lg shadow-indigo-500/30 flex-shrink-0">
-              <img src="~/assets/img/logo.png" alt="SmmBuzzer" class="w-full h-full object-contain" />
+              <img :src="`/${cfg.appBrand}/logo.png`" :alt="cfg.appName" class="w-full h-full object-contain" />
             </div>
             <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-[#0b0d1a]"
               :class="isLoading ? 'bg-amber-400' : 'bg-emerald-400'"></div>
           </div>
           <div class="block">
-            <p class="text-slate-900 dark:text-white text-[14px] font-bold leading-none">SmmBuzzer</p>
-            <p class="text-indigo-400 text-[10px] font-medium leading-none mt-0.5">Monitoring Layanan</p>
+            <p class="text-slate-900 dark:text-white text-[14px] font-bold leading-none">{{ cfg.appName }}</p>
+            <p class="text-indigo-400 text-[10px] font-medium leading-none mt-0.5">{{ cfg.appTagline }}</p>
           </div>
         </div>
 
@@ -234,6 +234,7 @@
 
 <script setup lang="ts">
 const { isDark, toggle: toggleTheme } = useTheme()
+const { public: cfg } = useRuntimeConfig()
 const props = withDefaults(defineProps<{
   searchQuery?: string
   isLoading: boolean

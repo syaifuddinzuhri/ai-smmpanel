@@ -315,9 +315,10 @@
 </template>
 
 <script setup lang="ts">
+const { public: appCfg } = useRuntimeConfig()
 useHead({
-  title: 'Monitoring Layanan - SmmBuzzer',
-  meta: [{ name: 'description', content: 'AI-powered SMM panel service recommendation dashboard' }]
+  title: appCfg.appMetaTitle,
+  meta: [{ name: 'description', content: appCfg.appMetaDesc }]
 })
 
 const {
