@@ -157,7 +157,7 @@
 
         <!-- Service rows -->
         <div class="divide-y divide-slate-100 dark:divide-white/[0.03]">
-          <div v-for="svc in group.services" :key="svc.service"
+          <div v-for="svc in pagedServices(group)" :key="svc.service"
             class="flex flex-col md:grid md:grid-cols-[3fr_1fr_1fr_1fr_80px_110px_148px_180px] md:items-center px-4 md:px-5 py-3 gap-0 md:gap-3 transition-colors hover:bg-[var(--row-hover)]">
 
             <!-- Name + meta -->
@@ -317,6 +317,41 @@
             </div>
           </div>
         </div>
+
+        <!-- Pagination footer -->
+        <div v-if="totalPages(group) > 1"
+          class="flex items-center justify-between px-5 py-3"
+          :style="{ borderTop: '1px solid var(--border-sub)' }">
+          <p class="text-[11px] text-slate-500">
+            {{ (getPage(group.platform) - 1) * PER_PAGE + 1 }}–{{ Math.min(getPage(group.platform) * PER_PAGE, group.services.length) }}
+            dari {{ group.services.length }} layanan
+          </p>
+          <div class="flex items-center gap-1">
+            <button
+              :disabled="getPage(group.platform) === 1"
+              class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              @click="setPage(group.platform, getPage(group.platform) - 1)"
+            >
+              <Icon name="heroicons:chevron-left" class="w-4 h-4" />
+            </button>
+            <button
+              v-for="p in totalPages(group)"
+              :key="p"
+              :class="[
+                'w-7 h-7 rounded-lg text-[12px] font-semibold transition-all',
+                p === getPage(group.platform) ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white'
+              ]"
+              @click="setPage(group.platform, p)"
+            >{{ p }}</button>
+            <button
+              :disabled="getPage(group.platform) === totalPages(group)"
+              class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+              @click="setPage(group.platform, getPage(group.platform) + 1)"
+            >
+              <Icon name="heroicons:chevron-right" class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -365,6 +400,28 @@ const onlyCancel = ref(false)
 const onlyWatchlist = ref(false)
 const onlySehat = ref(false)
 const selectedSort = ref('')
+
+const PER_PAGE = 15
+const platformPage = ref<Record<string, number>>({})
+
+function getPage(platform: string) {
+  return platformPage.value[platform] ?? 1
+}
+function setPage(platform: string, page: number) {
+  platformPage.value = { ...platformPage.value, [platform]: page }
+}
+function pagedServices(group: { platform: string; services: ReturnType<typeof sortServices> }) {
+  const page = getPage(group.platform)
+  return group.services.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+}
+function totalPages(group: { platform: string; services: { length: number } }) {
+  return Math.ceil(group.services.length / PER_PAGE)
+}
+
+// Reset halaman saat filter berubah
+watch([onlyRefill, onlyCancel, onlyWatchlist, onlySehat, selectedSort, () => props.searchQuery, () => props.selectedPlatform], () => {
+  platformPage.value = {}
+})
 
 const sortOptions = [
   { value: '',             label: 'Urutan Default' },
