@@ -761,11 +761,12 @@ async function resyncData() {
 }
 const resync = resyncData;
 
+const { public: { appName } } = useRuntimeConfig()
 useHead({
   title: computed(() =>
     data.value
-      ? `${data.value.serviceName} — SmmBuzzer`
-      : "Detail Layanan — SmmBuzzer"
+      ? `${data.value.serviceName} — ${appName}`
+      : `Detail Layanan — ${appName}`
   )
 });
 

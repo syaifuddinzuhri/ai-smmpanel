@@ -30,7 +30,7 @@
         <div class="absolute inset-2 border-2 border-transparent border-t-violet-500 rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 0.8s"></div>
       </div>
       <div class="text-center space-y-1.5">
-        <p class="text-slate-300 text-[13px] font-medium">Mengambil data dari SmmBuzzer...</p>
+        <p class="text-slate-300 text-[13px] font-medium">Mengambil data dari {{ appName }}...</p>
         <p class="text-slate-600 text-[11px]">Fetching services &amp; order statistics</p>
         <p class="text-slate-700 text-[11px]">Proses ini memakan waktu 10–30 detik pada permintaan pertama.</p>
         <p class="text-indigo-400/70 text-[11px] font-medium mt-1">Permintaan berikutnya akan langsung tampil (cached ✓)</p>
@@ -251,7 +251,7 @@ const props = defineProps<{
 }>()
 defineEmits(['update:selectedSort'])
 
-const panelUrl = useRuntimeConfig().public.panelUrl
+const { public: { panelUrl, appName } } = useRuntimeConfig()
 
 const scoreColor    = (s: number) => s >= 95 ? 'text-emerald-400' : s >= 85 ? 'text-violet-400' : s >= 75 ? 'text-yellow-400' : 'text-red-400'
 const scoreBarColor = (s: number) => s >= 95 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : s >= 85 ? 'bg-gradient-to-r from-indigo-500 to-violet-500' : s >= 75 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-red-400'

@@ -256,7 +256,7 @@
 
       <!-- Footer -->
       <div class="mt-5 pb-5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-700 pt-3" :style="{ borderTop: '1px solid var(--border-sub)' }">
-        <span>SmmBuzzer · Dashboard Monitoring</span>
+        <span>{{ appCfg.appName }} · Dashboard Monitoring</span>
         <span v-if="!isLoading">Update terakhir: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
       </div>
     </main>
