@@ -334,15 +334,16 @@
             >
               <Icon name="heroicons:chevron-left" class="w-4 h-4" />
             </button>
-            <button
-              v-for="p in totalPages(group)"
-              :key="p"
-              :class="[
-                'w-7 h-7 rounded-lg text-[12px] font-semibold transition-all',
-                p === getPage(group.platform) ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white'
-              ]"
-              @click="setPage(group.platform, p)"
-            >{{ p }}</button>
+            <template v-for="p in pageNumbers(group.platform, totalPages(group))" :key="p">
+              <span v-if="p === '...'" class="w-7 text-center text-slate-600 text-[12px]">…</span>
+              <button v-else
+                :class="[
+                  'w-7 h-7 rounded-lg text-[12px] font-semibold transition-all',
+                  p === getPage(group.platform) ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white'
+                ]"
+                @click="setPage(group.platform, p)"
+              >{{ p }}</button>
+            </template>
             <button
               :disabled="getPage(group.platform) === totalPages(group)"
               class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-500 hover:bg-[var(--btn-hover)] hover:text-slate-900 dark:hover:text-white transition-all disabled:opacity-30 disabled:cursor-not-allowed"
@@ -416,6 +417,17 @@ function pagedServices(group: { platform: string; services: ReturnType<typeof so
 }
 function totalPages(group: { platform: string; services: { length: number } }) {
   return Math.ceil(group.services.length / PER_PAGE)
+}
+
+function pageNumbers(platform: string, total: number): (number | '...')[] {
+  const cur = getPage(platform)
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
+  const pages: (number | '...')[] = [1]
+  if (cur > 3) pages.push('...')
+  for (let i = Math.max(2, cur - 1); i <= Math.min(total - 1, cur + 1); i++) pages.push(i)
+  if (cur < total - 2) pages.push('...')
+  pages.push(total)
+  return pages
 }
 
 // Reset halaman saat filter berubah
