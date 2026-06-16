@@ -9,7 +9,8 @@ function getClient(): Client {
   if (_client) return _client
   const dir = join(process.cwd(), '.data')
   mkdirSync(dir, { recursive: true })
-  _client = createClient({ url: `file:${join(dir, 'smmbuzzer.db')}` })
+  const brand = process.env.NUXT_PUBLIC_APP_BRAND || 'smmbuzzer'
+  _client = createClient({ url: `file:${join(dir, `${brand}.db`)}` })
   return _client
 }
 
