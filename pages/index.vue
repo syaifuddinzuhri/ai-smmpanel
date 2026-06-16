@@ -49,7 +49,7 @@
           :value="searchQuery"
           :disabled="isLoading"
           type="text"
-          placeholder="Cari nama atau ID layanan..."
+          :placeholder="t('search.placeholder')"
           class="w-full rounded-xl py-2 pl-9 pr-8 text-[13px] text-slate-700 dark:text-slate-200 outline-none transition-all focus:border-indigo-500/40 placeholder:text-slate-400 dark:placeholder:text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
           :style="{ background: 'var(--bg-a60)', border: '1px solid var(--border)' }"
           @input="searchQuery = ($event.target as HTMLInputElement).value"
@@ -107,8 +107,8 @@
           <div class="card overflow-hidden">
             <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
               <Icon name="heroicons:trophy" class="w-4 h-4 text-amber-400" />
-              <span class="text-[14px] font-bold text-slate-900 dark:text-white">Top 10 Performer</span>
-              <span class="text-[11px] text-slate-500 ml-1">Layanan dengan Score tertinggi</span>
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">{{ t('top.title') }}</span>
+              <span class="text-[11px] text-slate-500 ml-1">{{ t('top.subtitle') }}</span>
             </div>
             <div v-if="isLoading" class="p-5 space-y-3">
               <div v-for="i in 5" :key="i" class="flex items-center gap-4">
@@ -128,15 +128,15 @@
                 <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
                 <div class="flex-1 min-w-0">
                   <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</p>
-                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} {{ t('label.orders') }}</p>
                 </div>
                 <div class="flex items-center gap-3 flex-shrink-0">
                   <div class="text-right">
                     <p :class="['text-[15px] font-black', svc.aiScore >= 95 ? 'text-emerald-400' : 'text-violet-400']">{{ svc.aiScore }}</p>
-                    <p class="text-slate-600 text-[10px]">score</p>
+                    <p class="text-slate-600 text-[10px]">{{ t('label.score') }}</p>
                   </div>
                   <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">Beli</a>
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">{{ t('btn.buy') }}</a>
                 </div>
               </div>
             </div>
@@ -148,8 +148,8 @@
           <div class="card overflow-hidden">
             <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
               <Icon name="heroicons:arrow-trending-up" class="w-4 h-4 text-emerald-400" />
-              <span class="text-[14px] font-bold text-slate-900 dark:text-white">Trending 10 Teratas</span>
-              <span class="text-[11px] text-slate-500 ml-1">Layanan dengan pertumbuhan order tertinggi</span>
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">{{ t('trending.title') }}</span>
+              <span class="text-[11px] text-slate-500 ml-1">{{ t('trending.subtitle') }}</span>
             </div>
             <div v-if="isLoading" class="p-5 space-y-3">
               <div v-for="i in 5" :key="i" class="flex items-center gap-4">
@@ -159,7 +159,7 @@
               </div>
             </div>
             <div v-else-if="filteredTrending.length === 0" class="px-5 py-10 text-center">
-              <p class="text-slate-500 text-[13px]">Tidak ada layanan trending saat ini</p>
+              <p class="text-slate-500 text-[13px]">{{ t('trending.empty') }}</p>
             </div>
             <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04]">
               <div v-for="svc in filteredTrending" :key="svc.id"
@@ -167,7 +167,7 @@
                 <Icon :name="svc.platformIcon" class="w-5 h-5 flex-shrink-0" />
                 <div class="flex-1 min-w-0">
                   <p class="text-slate-800 dark:text-slate-200 text-[13px] font-medium truncate">{{ svc.name }}</p>
-                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
+                  <p class="text-slate-500 text-[11px]">ID: {{ svc.id }} · {{ svc.orderCount.toLocaleString('id-ID') }} {{ t('label.orders') }}</p>
                 </div>
                 <div class="flex items-center gap-3 flex-shrink-0">
                   <div class="flex items-center gap-1 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-1">
@@ -175,7 +175,7 @@
                     <span class="text-emerald-400 text-[12px] font-bold">+{{ svc.trendPercent }}%</span>
                   </div>
                   <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">Beli</a>
+                    class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors">{{ t('btn.buy') }}</a>
                 </div>
               </div>
             </div>
@@ -187,8 +187,8 @@
           <div class="card overflow-hidden">
             <div class="px-5 py-3.5 flex items-center gap-2" :style="{ borderBottom: '1px solid var(--border)' }">
               <Icon name="heroicons:exclamation-triangle" class="w-4 h-4 text-red-400" />
-              <span class="text-[14px] font-bold text-slate-900 dark:text-white">10 Layanan Berisiko Teratas</span>
-              <span class="text-[11px] text-slate-500 ml-1">Cancel rate tinggi atau success rate rendah</span>
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">{{ t('risk.title') }}</span>
+              <span class="text-[11px] text-slate-500 ml-1">{{ t('risk.subtitle') }}</span>
             </div>
             <div v-if="isLoading" class="p-5 space-y-3">
               <div v-for="i in 4" :key="i" class="flex items-center gap-4">
@@ -198,7 +198,7 @@
             </div>
             <div v-else-if="filteredRisky.length === 0" class="flex items-center gap-2.5 px-5 py-6">
               <Icon name="heroicons:check-circle" class="w-5 h-5 text-emerald-400 flex-shrink-0" />
-              <span class="text-[13px] font-medium text-emerald-400">Tidak ada layanan berisiko!</span>
+              <span class="text-[13px] font-medium text-emerald-400">{{ t('risk.empty') }}</span>
             </div>
             <div v-else class="divide-y divide-slate-100 dark:divide-white/[0.04]">
               <div v-for="svc in filteredRisky" :key="svc.id"
@@ -214,7 +214,7 @@
                   </div>
                 </div>
                 <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"
-                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors flex-shrink-0">Beli</a>
+                  class="inline-flex items-center px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-colors flex-shrink-0">{{ t('btn.buy') }}</a>
               </div>
             </div>
           </div>
@@ -227,10 +227,10 @@
               <div class="w-7 h-7 rounded-lg bg-indigo-500/20 flex items-center justify-center">
                 <Icon name="heroicons:sparkles" class="w-4 h-4 text-indigo-400" />
               </div>
-              <span class="text-[14px] font-bold text-slate-900 dark:text-white">AI Insight</span>
+              <span class="text-[14px] font-bold text-slate-900 dark:text-white">{{ t('insight.title') }}</span>
               <span v-if="aiInsightLoading" class="flex items-center gap-1 text-[11px] text-violet-400 ml-1">
                 <span class="w-1.5 h-1.5 rounded-full bg-violet-400 animate-pulse inline-block"></span>
-                Memperbarui…
+                {{ t('insight.updating') }}
               </span>
             </div>
             <div v-if="isLoading || (!aiInsight && aiInsightLoading)" class="space-y-2">
@@ -241,11 +241,11 @@
             <div class="mt-5 pt-4 grid grid-cols-2 gap-3" :style="{ borderTop: '1px solid var(--border)' }">
               <div class="rounded-xl p-3.5 text-center" :style="{ background: 'var(--bg-subtle)' }">
                 <p class="text-indigo-300 font-black text-[22px]">{{ topPerformers[0]?.aiScore ?? '—' }}</p>
-                <p class="text-slate-500 text-[11px] mt-0.5">Top AI Score</p>
+                <p class="text-slate-500 text-[11px] mt-0.5">{{ t('insight.topScore') }}</p>
               </div>
               <div class="rounded-xl p-3.5 text-center" :style="{ background: 'var(--bg-subtle)' }">
                 <p class="text-emerald-300 font-black text-[22px]">{{ trendingServices[0] ? '+' + trendingServices[0].trendPercent + '%' : '—' }}</p>
-                <p class="text-slate-500 text-[11px] mt-0.5">Top Trend</p>
+                <p class="text-slate-500 text-[11px] mt-0.5">{{ t('insight.topTrend') }}</p>
               </div>
             </div>
           </div>
@@ -256,8 +256,8 @@
 
       <!-- Footer -->
       <div class="mt-5 pb-5 flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-700 pt-3" :style="{ borderTop: '1px solid var(--border-sub)' }">
-        <span>{{ appCfg.appName }} · Dashboard Monitoring</span>
-        <span v-if="!isLoading">Update terakhir: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
+        <span>{{ appCfg.appName }} · {{ t('footer.dashboard') }}</span>
+        <span v-if="!isLoading">{{ t('footer.lastUpdate') }}: <span class="text-indigo-500/70">{{ lastUpdate }} WIB</span></span>
       </div>
     </main>
 
@@ -283,14 +283,14 @@
         >
           <Icon name="heroicons:arrows-right-left" class="w-4 h-4 text-indigo-400 flex-shrink-0" />
           <span class="text-[12px] font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">
-            {{ comparisonCount }} layanan dipilih
+            {{ t('compare.selected', { n: comparisonCount }) }}
           </span>
           <button
             class="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 text-white text-[12px] font-semibold whitespace-nowrap shadow-lg shadow-indigo-500/25 disabled:opacity-50"
             :disabled="comparisonCount < 2"
             @click="showComparison = true"
           >
-            Bandingkan
+            {{ t('compare.btn') }}
           </button>
           <button
             class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 transition-colors flex-shrink-0"
@@ -315,6 +315,7 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useLang()
 const { public: appCfg } = useRuntimeConfig()
 useHead({
   title: appCfg.appMetaTitle,
@@ -373,15 +374,14 @@ onMounted(() => {
 
 const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
 
-const mainTabs = [
-  { key: 'monitor',     icon: 'heroicons:signal',               label: 'Monitoring' },
-  { key: 'rekomendasi', icon: 'heroicons:cpu-chip',             label: 'Rekomendasi' },
-  { key: 'top',         icon: 'heroicons:trophy',               label: 'Top' },
-  { key: 'trending',    icon: 'heroicons:arrow-trending-up',    label: 'Trend' },
-  { key: 'risk',        icon: 'heroicons:exclamation-triangle', label: 'Risiko' },
-  // { key: 'insight',     icon: 'heroicons:light-bulb',           label: 'Insight' },
-  { key: 'analitik',    icon: 'heroicons:chart-bar',            label: 'Analitik' },
-]
+const mainTabs = computed(() => [
+  { key: 'monitor',     icon: 'heroicons:signal',               label: t('tab.monitor') },
+  { key: 'rekomendasi', icon: 'heroicons:cpu-chip',             label: t('tab.rekomendasi') },
+  { key: 'top',         icon: 'heroicons:trophy',               label: t('tab.top') },
+  { key: 'trending',    icon: 'heroicons:arrow-trending-up',    label: t('tab.trending') },
+  { key: 'risk',        icon: 'heroicons:exclamation-triangle', label: t('tab.risk') },
+  { key: 'analitik',    icon: 'heroicons:chart-bar',            label: t('tab.analitik') },
+])
 </script>
 
 <style scoped>

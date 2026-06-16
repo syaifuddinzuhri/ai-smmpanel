@@ -22,26 +22,59 @@
           <!-- Update time: hanya desktop -->
           <div v-if="!isLoading" class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-500">
             <Icon name="heroicons:clock" class="w-3 h-3" />
-            Update terakhir: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
+            {{ t('header.lastUpdate') }}: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
           </div>
           <!-- Theme toggle -->
           <button
             @click="toggleTheme"
-            :title="isDark ? 'Mode terang' : 'Mode gelap'"
+            :title="isDark ? t('header.lightMode') : t('header.darkMode')"
             class="flex items-center justify-center w-7 h-7 rounded-lg border text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200"
             :style="{ background: 'var(--bg-input)', borderColor: 'var(--border)' }"
           >
             <Icon :name="isDark ? 'heroicons:sun' : 'heroicons:moon'" class="w-3.5 h-3.5" />
           </button>
+          <!-- Language dropdown -->
+          <div class="relative" ref="langRef">
+            <button
+              @click.stop="showLangDropdown = !showLangDropdown"
+              class="flex items-center gap-1 px-2 h-7 rounded-lg border text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-[11px] font-bold"
+              :style="{ background: 'var(--bg-input)', borderColor: 'var(--border)' }"
+            >
+              <Icon name="heroicons:language" class="w-3 h-3 flex-shrink-0" />
+              {{ lang.toUpperCase() }}
+              <Icon name="heroicons:chevron-down" class="w-2.5 h-2.5 flex-shrink-0 transition-transform duration-150" :class="showLangDropdown ? 'rotate-180' : ''" />
+            </button>
+            <Transition name="dropdown">
+              <div
+                v-if="showLangDropdown"
+                class="absolute right-0 top-full mt-1.5 z-50 rounded-xl shadow-xl overflow-hidden min-w-[100px]"
+                :style="{ background: 'var(--bg-card)', border: '1px solid var(--border-str)' }"
+              >
+                <button
+                  v-for="opt in langOptions"
+                  :key="opt.value"
+                  @click="setLang(opt.value); showLangDropdown = false"
+                  class="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-colors text-left"
+                  :class="lang === opt.value
+                    ? 'text-indigo-400 bg-indigo-500/10'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-[var(--row-hover)]'"
+                >
+                  <span class="text-base leading-none">{{ opt.flag }}</span>
+                  <span>{{ opt.label }}</span>
+                  <Icon v-if="lang === opt.value" name="heroicons:check" class="w-3 h-3 ml-auto text-indigo-400" />
+                </button>
+              </div>
+            </Transition>
+          </div>
           <!-- Resync -->
           <button
             v-if="!isLoading && showResync"
             @click="$emit('resync')"
-            title="Resync data"
+            :title="t('header.resync')"
             class="flex items-center gap-1 px-2 py-1 rounded-md bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 hover:bg-indigo-500/20 hover:text-indigo-300 transition-all duration-200 text-[11px] font-medium"
           >
             <Icon name="heroicons:arrow-path" class="w-3 h-3 flex-shrink-0" />
-            <span class="hidden sm:inline">Sinkron Ulang</span>
+            <span class="hidden sm:inline">{{ t('header.resync') }}</span>
           </button>
           <!-- Status pill -->
           <div :class="[
@@ -55,13 +88,13 @@
                   : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-400'
           ]">
             <span :class="['w-1.5 h-1.5 rounded-full animate-pulse', isLoading ? 'bg-amber-400' : apiError ? 'bg-red-400' : fromCache ? 'bg-slate-400' : 'bg-emerald-400']"></span>
-            {{ isLoading ? 'Updating' : apiError ? 'Error' : fromCache ? 'Cached' : 'Live' }}
+            {{ isLoading ? t('header.updating') : apiError ? t('header.error') : fromCache ? t('header.cached') : t('header.live') }}
           </div>
         </div>
       </div>
     </header>
 
-    <!-- Sub-bar: relative + z-40 di semua ukuran agar dropdown tidak tertutup konten -->
+    <!-- Sub-bar -->
     <div v-if="showSubBar" class="relative z-40 sm:sticky sm:top-[56px] backdrop-blur-xl border-b" :style="{ background: 'var(--bg-sub)', borderColor: 'var(--border-sub)' }">
 
       <!-- Desktop sub-bar -->
@@ -70,7 +103,7 @@
         <!-- Label saat filter platform disembunyikan -->
         <div v-if="!showPlatformFilter" class="flex items-center gap-1.5 px-2 py-1">
           <Icon name="heroicons:chart-bar" class="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-          <span class="text-[12px] font-semibold text-indigo-400">Analitik Layanan</span>
+          <span class="text-[12px] font-semibold text-indigo-400">{{ t('header.analytics') }}</span>
         </div>
 
         <!-- Pinned platform tabs -->
@@ -88,7 +121,7 @@
         >
           <Icon v-if="p.icon" :name="p.icon" class="w-4 h-4 flex-shrink-0" />
           <Icon v-else name="heroicons:squares-2x2" class="w-3.5 h-3.5 flex-shrink-0 text-slate-500" />
-          {{ p.label }}
+          {{ platformLabel(p.label) }}
         </button>
 
         <!-- Overflow dropdown -->
@@ -103,7 +136,7 @@
             @click="showOverflow = !showOverflow"
           >
             <Icon v-if="overflowActive && activeOverflow?.icon" :name="activeOverflow!.icon" class="w-4 h-4 flex-shrink-0" />
-            {{ overflowActive ? activeOverflow?.label : 'Lainnya' }}
+            {{ overflowActive ? platformLabel(activeOverflow?.label ?? '') : (lang === 'en' ? 'More' : 'Lainnya') }}
             <Icon name="heroicons:chevron-down" :class="['w-3 h-3 transition-transform', showOverflow ? 'rotate-180' : '']" />
           </button>
 
@@ -116,7 +149,7 @@
                 <Icon name="heroicons:magnifying-glass" class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                 <input
                   v-model="overflowSearch"
-                  placeholder="Cari platform..."
+                  :placeholder="t('header.searchPlatform')"
                   class="bg-transparent text-[12px] text-slate-700 dark:text-slate-300 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 w-full"
                 />
               </div>
@@ -134,9 +167,9 @@
                 @click="selectPlatform(p.label)"
               >
                 <Icon v-if="p.icon" :name="p.icon" class="w-4 h-4 flex-shrink-0" />
-                {{ p.label }}
+                {{ platformLabel(p.label) }}
               </button>
-              <p v-if="!filteredOverflow.length" class="text-center text-slate-500 text-[11px] py-3">Tidak ditemukan</p>
+              <p v-if="!filteredOverflow.length" class="text-center text-slate-500 text-[11px] py-3">{{ lang === 'en' ? 'Not found' : 'Tidak ditemukan' }}</p>
             </div>
           </div>
         </div>
@@ -164,7 +197,7 @@
         <!-- Label analitik mobile -->
         <div v-if="!showPlatformFilter" class="flex items-center gap-1.5 flex-1">
           <Icon name="heroicons:chart-bar" class="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" />
-          <span class="text-[12px] font-semibold text-indigo-400">Analitik Layanan</span>
+          <span class="text-[12px] font-semibold text-indigo-400">{{ t('header.analytics') }}</span>
         </div>
 
         <!-- Custom platform dropdown -->
@@ -176,7 +209,7 @@
           >
             <Icon v-if="activePlatform?.icon" :name="activePlatform.icon" class="w-4 h-4 flex-shrink-0" />
             <Icon v-else name="heroicons:squares-2x2" class="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
-            <span class="flex-1 text-left truncate">{{ selectedPlatform }}</span>
+            <span class="flex-1 text-left truncate">{{ platformLabel(selectedPlatform) }}</span>
             <Icon name="heroicons:chevron-down" :class="['w-3.5 h-3.5 flex-shrink-0 text-slate-500 transition-transform', showMobile ? 'rotate-180' : '']" />
           </button>
 
@@ -189,7 +222,7 @@
                 <Icon name="heroicons:magnifying-glass" class="w-3.5 h-3.5 text-slate-500 flex-shrink-0" />
                 <input
                   v-model="mobileSearch"
-                  placeholder="Cari platform..."
+                  :placeholder="t('header.searchPlatform')"
                   class="bg-transparent text-[12px] text-slate-700 dark:text-slate-300 outline-none placeholder:text-slate-400 dark:placeholder:text-slate-600 w-full"
                 />
               </div>
@@ -208,7 +241,7 @@
               >
                 <Icon v-if="p.icon" :name="p.icon" class="w-4 h-4 flex-shrink-0" />
                 <Icon v-else name="heroicons:squares-2x2" class="w-3.5 h-3.5 flex-shrink-0" />
-                {{ p.label }}
+                {{ platformLabel(p.label) }}
               </button>
             </div>
           </div>
@@ -234,6 +267,14 @@
 
 <script setup lang="ts">
 const { isDark, toggle: toggleTheme } = useTheme()
+const { lang, setLang, t } = useLang()
+
+const showLangDropdown = ref(false)
+const langRef = ref<HTMLElement | null>(null)
+const langOptions = [
+  { value: 'id' as const, label: 'Indonesia', flag: '🇮🇩' },
+  { value: 'en' as const, label: 'English',   flag: '🇺🇸' },
+]
 const { public: cfg } = useRuntimeConfig()
 const props = withDefaults(defineProps<{
   searchQuery?: string
@@ -260,6 +301,12 @@ const props = withDefaults(defineProps<{
 })
 const emit = defineEmits(['update:searchQuery', 'update:selectedPlatform', 'update:selectedPeriod', 'resync'])
 
+function platformLabel(label: string): string {
+  if (label === 'Semua') return t('platform.all')
+  if (label === 'Lain-lain') return t('platform.others')
+  return label
+}
+
 // Desktop overflow dropdown
 const PINNED = ['Semua', 'Instagram', 'TikTok', 'YouTube']
 const pinnedPlatforms = computed(() => props.platforms.filter(p => PINNED.includes(p.label)))
@@ -271,7 +318,7 @@ const overflowRef = ref<HTMLElement | null>(null)
 
 const filteredOverflow = computed(() => {
   const q = overflowSearch.value.toLowerCase()
-  return q ? overflowPlatforms.value.filter(p => p.label.toLowerCase().includes(q)) : overflowPlatforms.value
+  return q ? overflowPlatforms.value.filter(p => platformLabel(p.label).toLowerCase().includes(q)) : overflowPlatforms.value
 })
 
 const overflowActive = computed(() => overflowPlatforms.value.some(p => p.label === props.selectedPlatform))
@@ -286,7 +333,7 @@ const activePlatform = computed(() => props.platforms.find(p => p.label === prop
 
 const filteredMobile = computed(() => {
   const q = mobileSearch.value.toLowerCase()
-  return q ? props.platforms.filter(p => p.label.toLowerCase().includes(q)) : props.platforms
+  return q ? props.platforms.filter(p => platformLabel(p.label).toLowerCase().includes(q)) : props.platforms
 })
 
 function selectPlatform(label: string) {
@@ -295,8 +342,6 @@ function selectPlatform(label: string) {
   overflowSearch.value = ''
 }
 
-// Click-outside detection via document listener (tidak pakai overlay agar tidak konflik
-// dengan stacking context dari backdrop-blur pada sub-bar)
 function handleDocClick(e: MouseEvent) {
   if (showOverflow.value && overflowRef.value && !overflowRef.value.contains(e.target as Node)) {
     showOverflow.value = false
@@ -306,8 +351,23 @@ function handleDocClick(e: MouseEvent) {
     showMobile.value = false
     mobileSearch.value = ''
   }
+  if (showLangDropdown.value && langRef.value && !langRef.value.contains(e.target as Node)) {
+    showLangDropdown.value = false
+  }
 }
 
 onMounted(() => document.addEventListener('click', handleDocClick))
 onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
 </script>
+
+<style scoped>
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-4px) scale(0.97);
+}
+</style>

@@ -50,13 +50,13 @@
         @click="onlyWatchlist = !onlyWatchlist"
       >
         <Icon name="heroicons:star" class="w-3 h-3" />
-        Favorit
+        {{ t('monitor.favorites') }}
         <span v-if="watchlistCount > 0" :class="['text-[10px] font-bold px-1.5 py-0.5 rounded-full', onlyWatchlist ? 'bg-amber-500/30 text-amber-300' : 'bg-slate-200 dark:bg-white/10 text-slate-500']">{{ watchlistCount }}</span>
       </button>
 
       <div class="w-px h-4 bg-slate-300 dark:bg-white/10 flex-shrink-0"></div>
 
-      <!-- Refill / Cancel toggles -->
+      <!-- Refill / Cancel / Sehat toggles -->
       <button
         :class="[
           'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold transition-all border',
@@ -85,7 +85,7 @@
         @click="onlySehat = !onlySehat"
       >
         <Icon name="heroicons:heart" class="w-3 h-3" />
-        Sehat
+        {{ t('monitor.healthy') }}
       </button>
 
       <!-- Reset -->
@@ -95,7 +95,7 @@
         @click="onlyRefill = false; onlyCancel = false; onlyWatchlist = false; onlySehat = false; selectedSort = ''"
       >
         <Icon name="heroicons:x-mark" class="w-3 h-3" />
-        Reset
+        {{ t('monitor.reset') }}
       </button>
     </div>
 
@@ -115,9 +115,9 @@
     <!-- Empty state -->
     <div v-else-if="!filteredGroups.length" class="card p-12 text-center">
       <Icon name="heroicons:archive-box" class="w-10 h-10 mb-3 opacity-30 text-slate-400 mx-auto" />
-      <p class="text-slate-400 text-[14px] font-medium">Tidak ada layanan ditemukan</p>
+      <p class="text-slate-400 text-[14px] font-medium">{{ t('monitor.noServices') }}</p>
       <p class="text-slate-600 text-[12px] mt-1">
-        {{ services.length === 0 ? 'Katalog layanan belum tersedia' : 'Coba ubah filter atau kata kunci' }}
+        {{ services.length === 0 ? t('monitor.catalogEmpty') : t('monitor.changeFilter') }}
       </p>
     </div>
 
@@ -128,9 +128,9 @@
         <div class="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-4 md:px-5 py-3" :style="{ borderBottom: '1px solid var(--border)' }">
           <div class="flex items-center gap-2 flex-shrink-0">
             <Icon :name="group.icon" class="w-5 h-5 flex-shrink-0" />
-            <span class="text-slate-900 dark:text-white font-semibold text-[14px]">{{ group.platform }}</span>
+            <span class="text-slate-900 dark:text-white font-semibold text-[14px]">{{ platformLabel(group.platform) }}</span>
             <span class="text-[11px] px-2 py-0.5 rounded-full text-slate-500" :style="{ background: 'var(--bg-input)', border: '1px solid var(--border-str)' }">
-              {{ group.services.length }} layanan
+              {{ group.services.length }} {{ t('monitor.services') }}
             </span>
           </div>
           <div class="flex items-center gap-2.5 text-[11px] w-full md:w-auto md:ml-auto pl-7 md:pl-0">
@@ -145,14 +145,14 @@
 
         <!-- Column headers (desktop) -->
         <div class="hidden md:grid grid-cols-[3fr_1fr_1fr_1fr_80px_110px_148px_180px] gap-3 px-5 py-2" :style="{ borderBottom: '1px solid var(--border-sub)' }">
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">Layanan</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Harga / 100</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Min Order</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Max Order</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Orders</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Kondisi</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-right pr-1">Fitur</span>
-          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">Aksi</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600">{{ t('monitor.colService') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colPrice') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colMinOrder') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colMaxOrder') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colOrders') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colCondition') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-right pr-1">{{ t('monitor.colFeature') }}</span>
+          <span class="text-[10px] font-semibold uppercase tracking-wider text-slate-600 text-center">{{ t('monitor.colAction') }}</span>
         </div>
 
         <!-- Service rows -->
@@ -173,24 +173,24 @@
               </div>
             </div>
 
-            <!-- Harga/1000 -->
+            <!-- Harga/100 -->
             <div class="hidden md:block text-center">
               <p class="text-indigo-400 dark:text-indigo-300 text-[13px] font-semibold tabular-nums">
-                {{ Number(svc.rate) > 0 ? 'Rp ' + (Number(svc.rate) / 10).toLocaleString('id-ID') : '—' }}
+                {{ Number(svc.rate) > 0 ? 'Rp ' + (Number(svc.rate) / 10).toLocaleString('id-ID') : '—' }}
               </p>
-              <p class="text-slate-700 text-[10px]">per 100</p>
+              <p class="text-slate-700 text-[10px]">{{ t('monitor.per100') }}</p>
             </div>
 
             <!-- Min order -->
             <div class="hidden md:block text-center">
               <p class="text-slate-400 text-[13px] tabular-nums">{{ Number(svc.min).toLocaleString('id-ID') }}</p>
-              <p class="text-slate-700 text-[10px]">minimum</p>
+              <p class="text-slate-700 text-[10px]">{{ t('monitor.minimum') }}</p>
             </div>
 
             <!-- Max order -->
             <div class="hidden md:block text-center">
               <p class="text-slate-400 text-[13px] tabular-nums">{{ Number(svc.max).toLocaleString('id-ID') }}</p>
-              <p class="text-slate-700 text-[10px]">maksimum</p>
+              <p class="text-slate-700 text-[10px]">{{ t('monitor.maximum') }}</p>
             </div>
 
             <!-- Total Orders -->
@@ -198,7 +198,7 @@
               <p class="text-slate-700 dark:text-slate-300 text-[13px] font-semibold tabular-nums">
                 {{ svcStats(svc.service).total > 0 ? svcStats(svc.service).total.toLocaleString('id-ID') : '—' }}
               </p>
-              <p class="text-slate-600 text-[10px]">transaksi</p>
+              <p class="text-slate-600 text-[10px]">{{ t('monitor.transactions') }}</p>
             </div>
 
             <!-- Kondisi -->
@@ -206,11 +206,11 @@
               <span v-if="svcStats(svc.service).total === 0" class="text-slate-500 text-[12px]">—</span>
               <span v-else-if="svcCancelRate(svc.service) < 5"
                 class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
-                Sehat
+                {{ t('monitor.condHealthy') }}
               </span>
               <span v-else
                 class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 font-semibold whitespace-nowrap">
-                Perhatian
+                {{ t('monitor.condWarning') }}
               </span>
             </div>
 
@@ -218,21 +218,21 @@
             <div class="flex md:hidden items-center gap-1.5 mt-1 mb-2 flex-wrap">
               <span v-if="svcStats(svc.service).total > 0"
                 class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold tabular-nums whitespace-nowrap">
-                {{ svcStats(svc.service).total.toLocaleString('id-ID') }} order
+                {{ svcStats(svc.service).total.toLocaleString('id-ID') }} {{ t('monitor.transactions') }}
               </span>
               <template v-if="svcStats(svc.service).total > 0">
                 <span v-if="svcCancelRate(svc.service) < 5"
                   class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-semibold whitespace-nowrap">
-                  ✓ Sehat
+                  ✓ {{ t('monitor.condHealthy') }}
                 </span>
                 <span v-else
                   class="text-[10px] px-2 py-0.5 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 font-semibold whitespace-nowrap">
-                  ⚠ Perhatian
+                  ⚠ {{ t('monitor.condWarning') }}
                 </span>
               </template>
             </div>
 
-            <!-- Mobile bottom row: harga + badge + aksi -->
+            <!-- Mobile bottom row -->
             <div class="flex md:contents items-center gap-2">
               <span class="md:hidden text-indigo-400 dark:text-indigo-300 text-[12px] font-bold tabular-nums">
                 Rp&nbsp;{{ (Number(svc.rate) / 10).toLocaleString('id-ID') }}<span class="text-slate-500 font-normal text-[10px]">/100</span>
@@ -261,7 +261,7 @@
                     isComparing(svc.service) ? 'text-indigo-400' : (!canCompare && !isComparing(svc.service)) ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-indigo-400']"
                   :style="{ background: isComparing(svc.service) ? 'rgba(99,102,241,0.18)' : 'var(--bg-input)', border: `1px solid ${isComparing(svc.service) ? 'rgba(99,102,241,0.3)' : 'var(--border)'}` }"
                   :disabled="!canCompare && !isComparing(svc.service)"
-                  title="Tambah ke komparasi (maks. 3)"
+                  :title="t('monitor.compareTitle')"
                   @click.prevent="toggleCompare(svc.service)"
                 >
                   <Icon :name="isComparing(svc.service) ? 'heroicons:check' : 'heroicons:arrows-right-left'" class="w-3.5 h-3.5" />
@@ -270,12 +270,12 @@
                   :href="`${panelUrl}?service=${svc.service}`"
                   target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150"
-                >Beli</a>
+                >{{ t('btn.buy') }}</a>
                 <NuxtLink
                   :to="{ path: `/service/${svc.service}`, query: props.selectedPeriod ? { period: props.selectedPeriod } : {} }"
                   class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-300 text-[11px] font-semibold transition-all duration-150"
                   :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
-                >Detail</NuxtLink>
+                >{{ t('btn.detail') }}</NuxtLink>
               </div>
             </div>
 
@@ -293,7 +293,7 @@
                   isComparing(svc.service) ? 'text-indigo-400' : (!canCompare && !isComparing(svc.service)) ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-400 hover:text-indigo-400']"
                 :style="{ background: isComparing(svc.service) ? 'rgba(99,102,241,0.18)' : 'var(--bg-input)', border: `1px solid ${isComparing(svc.service) ? 'rgba(99,102,241,0.3)' : 'var(--border)'}` }"
                 :disabled="!canCompare && !isComparing(svc.service)"
-                title="Tambah ke komparasi (maks. 3)"
+                :title="t('monitor.compareTitle')"
                 @click.prevent="toggleCompare(svc.service)"
               >
                 <Icon :name="isComparing(svc.service) ? 'heroicons:check' : 'heroicons:arrows-right-left'" class="w-3.5 h-3.5" />
@@ -303,7 +303,7 @@
                 target="_blank" rel="noopener noreferrer"
                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap shadow-sm shadow-indigo-500/20"
               >
-                Beli
+                {{ t('btn.buy') }}
                 <Icon name="heroicons:arrow-top-right-on-square" class="w-2.5 h-2.5" />
               </a>
               <NuxtLink
@@ -311,7 +311,7 @@
                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap"
                 :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
               >
-                Detail
+                {{ t('btn.detail') }}
                 <Icon name="heroicons:chart-bar" class="w-2.5 h-2.5" />
               </NuxtLink>
             </div>
@@ -323,8 +323,11 @@
           class="flex items-center justify-between px-5 py-3"
           :style="{ borderTop: '1px solid var(--border-sub)' }">
           <p class="text-[11px] text-slate-500">
-            {{ (getPage(group.platform) - 1) * PER_PAGE + 1 }}–{{ Math.min(getPage(group.platform) * PER_PAGE, group.services.length) }}
-            dari {{ group.services.length }} layanan
+            {{ t('monitor.paginationOf', {
+              from: (getPage(group.platform) - 1) * PER_PAGE + 1,
+              to: Math.min(getPage(group.platform) * PER_PAGE, group.services.length),
+              total: group.services.length
+            }) }}
           </p>
           <div class="flex items-center gap-1">
             <button
@@ -362,7 +365,14 @@
 import type { RawService } from '~/server/api/services.get'
 import type { RawOrder } from '~/server/api/orders.get'
 
+const { t } = useLang()
 const panelUrl = useRuntimeConfig().public.panelUrl
+
+function platformLabel(label: string): string {
+  if (label === 'Semua') return t('platform.all')
+  if (label === 'Lain-lain') return t('platform.others')
+  return label
+}
 
 const orderMap = computed(() => {
   const map = new Map<number, { total: number; canceled: number }>()
@@ -430,24 +440,23 @@ function pageNumbers(platform: string, total: number): (number | '...')[] {
   return pages
 }
 
-// Reset halaman saat filter berubah
 watch([onlyRefill, onlyCancel, onlyWatchlist, onlySehat, selectedSort, () => props.searchQuery, () => props.selectedPlatform], () => {
   platformPage.value = {}
 })
 
-const sortOptions = [
-  { value: '',             label: 'Urutan Default' },
-  { value: 'name_asc',    label: 'Nama A → Z' },
-  { value: 'name_desc',   label: 'Nama Z → A' },
-  { value: 'price_asc',   label: 'Harga Termurah' },
-  { value: 'price_desc',  label: 'Harga Termahal' },
-  { value: 'min_asc',     label: 'Min Order ↑' },
-  { value: 'min_desc',    label: 'Min Order ↓' },
-  { value: 'max_asc',     label: 'Max Order ↑' },
-  { value: 'max_desc',    label: 'Max Order ↓' },
-  { value: 'orders_desc', label: 'Order ↓' },
-  { value: 'orders_asc',  label: 'Order ↑' },
-]
+const sortOptions = computed(() => [
+  { value: '',             label: t('monitor.sortDefault') },
+  { value: 'name_asc',    label: t('monitor.sortNameAsc') },
+  { value: 'name_desc',   label: t('monitor.sortNameDesc') },
+  { value: 'price_asc',   label: t('monitor.sortPriceAsc') },
+  { value: 'price_desc',  label: t('monitor.sortPriceDesc') },
+  { value: 'min_asc',     label: t('monitor.sortMinAsc') },
+  { value: 'min_desc',    label: t('monitor.sortMinDesc') },
+  { value: 'max_asc',     label: t('monitor.sortMaxAsc') },
+  { value: 'max_desc',    label: t('monitor.sortMaxDesc') },
+  { value: 'orders_desc', label: t('monitor.sortOrdersDesc') },
+  { value: 'orders_asc',  label: t('monitor.sortOrdersAsc') },
+])
 
 function sortServices(list: RawService[]): RawService[] {
   if (!selectedSort.value) return list
@@ -534,27 +543,27 @@ const summary = computed(() => {
   return [
     {
       icon: 'heroicons:archive-box', accent: 'bg-indigo-500', labelColor: 'text-indigo-400',
-      label: 'Total Layanan', dotColor: 'bg-indigo-400',
+      label: t('monitor.totalServices'), dotColor: 'bg-indigo-400',
       value: n.toLocaleString('id-ID'),
-      sub: 'Dari katalog aktif', subColor: 'text-slate-400',
+      sub: t('monitor.fromCatalog'), subColor: 'text-slate-400',
     },
     {
       icon: 'heroicons:tag', accent: 'bg-violet-500', labelColor: 'text-violet-400',
-      label: 'Kategori', dotColor: 'bg-violet-400',
+      label: t('monitor.categories'), dotColor: 'bg-violet-400',
       value: categoryCount.toLocaleString('id-ID'),
-      sub: 'Jenis layanan unik', subColor: 'text-violet-400',
+      sub: t('monitor.uniqueTypes'), subColor: 'text-violet-400',
     },
     {
       icon: 'heroicons:arrow-path', accent: 'bg-emerald-500', labelColor: 'text-emerald-400',
-      label: 'Support Refill', dotColor: 'bg-emerald-400',
+      label: t('monitor.refillSupport'), dotColor: 'bg-emerald-400',
       value: refillCount.toLocaleString('id-ID'),
-      sub: n ? `${Math.round((refillCount / n) * 100)}% dari total` : '—', subColor: 'text-emerald-400',
+      sub: n ? t('monitor.ofTotal', { pct: Math.round((refillCount / n) * 100) }) : '—', subColor: 'text-emerald-400',
     },
     {
       icon: 'heroicons:x-mark', accent: 'bg-blue-500', labelColor: 'text-blue-400',
-      label: 'Support Cancel', dotColor: 'bg-blue-400',
+      label: t('monitor.cancelSupport'), dotColor: 'bg-blue-400',
       value: cancelCount.toLocaleString('id-ID'),
-      sub: n ? `${Math.round((cancelCount / n) * 100)}% dari total` : '—', subColor: 'text-blue-400',
+      sub: n ? t('monitor.ofTotal', { pct: Math.round((cancelCount / n) * 100) }) : '—', subColor: 'text-blue-400',
     },
   ]
 })

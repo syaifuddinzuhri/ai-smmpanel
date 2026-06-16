@@ -4,13 +4,13 @@
     <div class="flex items-center justify-between px-4 py-3 gap-3 flex-wrap" :style="{ borderBottom: '1px solid var(--border)' }">
       <div class="flex items-center gap-2">
         <div class="w-1.5 h-5 rounded bg-gradient-to-b from-indigo-500 to-violet-600"></div>
-        <span class="text-[13px] font-bold text-slate-900 dark:text-white">Rekomendasi Layanan</span>
+        <span class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('table.title') }}</span>
         <span v-if="!isLoading" class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-medium">
-          {{ services.length }} layanan
+          {{ t('table.count', { n: services.length }) }}
         </span>
       </div>
       <div class="flex items-center gap-2 ml-auto">
-        <span class="text-[11px] text-slate-600 hidden sm:inline">Urutkan:</span>
+        <span class="text-[11px] text-slate-600 hidden sm:inline">{{ t('table.sort') }}</span>
         <select
           :value="selectedSort"
           @change="$emit('update:selectedSort', ($event.target as HTMLSelectElement).value)"
@@ -30,17 +30,17 @@
         <div class="absolute inset-2 border-2 border-transparent border-t-violet-500 rounded-full animate-spin" style="animation-direction: reverse; animation-duration: 0.8s"></div>
       </div>
       <div class="text-center space-y-1.5">
-        <p class="text-slate-300 text-[13px] font-medium">Mengambil data dari {{ appName }}...</p>
-        <p class="text-slate-600 text-[11px]">Fetching services &amp; order statistics</p>
-        <p class="text-slate-700 text-[11px]">Proses ini memakan waktu 10–30 detik pada permintaan pertama.</p>
-        <p class="text-indigo-400/70 text-[11px] font-medium mt-1">Permintaan berikutnya akan langsung tampil (cached ✓)</p>
+        <p class="text-slate-300 text-[13px] font-medium">{{ t('table.loading', { name: appName }) }}</p>
+        <p class="text-slate-600 text-[11px]">{{ t('table.loadingFetching') }}</p>
+        <p class="text-slate-700 text-[11px]">{{ t('table.loadingHint1') }}</p>
+        <p class="text-indigo-400/70 text-[11px] font-medium mt-1">{{ t('table.loadingHint2') }}</p>
       </div>
     </div>
 
     <!-- Empty -->
     <div v-else-if="services.length === 0" class="flex flex-col items-center justify-center py-12 gap-3">
       <Icon name="heroicons:magnifying-glass" class="w-8 h-8 opacity-30 text-slate-400" />
-      <p class="text-slate-500 text-sm">Tidak ada layanan yang cocok dengan pencarian</p>
+      <p class="text-slate-500 text-sm">{{ t('table.empty') }}</p>
     </div>
 
     <!-- Desktop table -->
@@ -49,14 +49,14 @@
         <thead>
           <tr :style="{ background: 'var(--bg-subtle)' }">
             <th class="text-left px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest w-9">#</th>
-            <th class="text-left px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Layanan</th>
+            <th class="text-left px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">{{ t('table.colService') }}</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Score</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Success</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Orders</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Cancel</th>
             <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Trend</th>
-            <th class="text-right px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest w-36">Harga / 100</th>
-            <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Aksi</th>
+            <th class="text-right px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest w-36">{{ t('table.colPrice') }}</th>
+            <th class="text-center px-3 py-2.5 text-[10px] font-bold text-slate-600 uppercase tracking-widest">{{ t('table.colAction') }}</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-slate-100 dark:divide-white/[0.03]">
@@ -88,13 +88,13 @@
                     <span class="opacity-30">·</span>
                     <span>{{ svc.category }}</span>
                     <span class="opacity-30">·</span>
-                    <span :class="speedColor(svc.speed)">{{ svc.speed }}</span>
+                    <span :class="speedColor(svc.speed)">{{ speedLabel(svc.speed) }}</span>
                   </div>
                 </div>
               </div>
             </td>
 
-            <!-- Score with mini ring -->
+            <!-- Score -->
             <td class="px-3 py-3 text-center">
               <div class="inline-flex flex-col items-center gap-1">
                 <span :class="['text-[14px] font-bold tabular-nums', scoreColor(svc.aiScore)]">{{ svc.aiScore }}</span>
@@ -144,7 +144,7 @@
               <span class="text-[13px] font-semibold text-indigo-400 tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
             </td>
 
-            <!-- Aksi -->
+            <!-- Action -->
             <td class="px-3 py-3 text-center">
               <div class="flex items-center justify-center gap-1.5">
                 <a
@@ -152,7 +152,7 @@
                   target="_blank" rel="noopener noreferrer"
                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap shadow-sm shadow-indigo-500/20"
                 >
-                  Beli
+                  {{ t('btn.buy') }}
                   <Icon name="heroicons:arrow-top-right-on-square" class="w-2.5 h-2.5" />
                 </a>
                 <NuxtLink
@@ -160,7 +160,7 @@
                   class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-[11px] font-semibold transition-all duration-150 whitespace-nowrap"
                   :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
                 >
-                  Detail
+                  {{ t('btn.detail') }}
                   <Icon name="heroicons:chart-bar" class="w-2.5 h-2.5" />
                 </NuxtLink>
               </div>
@@ -191,7 +191,7 @@
         <div class="grid grid-cols-4 gap-2 mb-2.5">
           <div class="rounded-lg p-2 text-center" :style="{ background: 'var(--bg-subtle)' }">
             <p :class="['text-[13px] font-bold', scoreColor(svc.aiScore)]">{{ svc.aiScore }}</p>
-            <p class="text-slate-600 text-[10px]">Score</p>
+            <p class="text-slate-600 text-[10px]">{{ t('label.score') }}</p>
           </div>
           <div class="rounded-lg p-2 text-center" :style="{ background: 'var(--bg-subtle)' }">
             <p :class="['text-[13px] font-semibold', svc.successRate >= 98 ? 'text-emerald-400' : 'text-yellow-400']">{{ svc.successRate }}%</p>
@@ -220,7 +220,7 @@
               target="_blank" rel="noopener noreferrer"
               class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[12px] font-semibold transition-all duration-150 shadow-sm shadow-indigo-500/20"
             >
-              Beli
+              {{ t('btn.buy') }}
               <Icon name="heroicons:arrow-top-right-on-square" class="w-3 h-3" />
             </a>
             <NuxtLink
@@ -228,7 +228,7 @@
               class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white text-[12px] font-semibold transition-all duration-150"
               :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
             >
-              Detail
+              {{ t('btn.detail') }}
               <Icon name="heroicons:chart-bar" class="w-3 h-3" />
             </NuxtLink>
           </div>
@@ -240,6 +240,8 @@
 
 <script setup lang="ts">
 import type { Service } from '~/composables/useServices'
+
+const { t } = useLang()
 
 const props = defineProps<{
   services: Service[]
@@ -256,4 +258,12 @@ const { public: { panelUrl, appName } } = useRuntimeConfig()
 const scoreColor    = (s: number) => s >= 95 ? 'text-emerald-400' : s >= 85 ? 'text-violet-400' : s >= 75 ? 'text-yellow-400' : 'text-red-400'
 const scoreBarColor = (s: number) => s >= 95 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : s >= 85 ? 'bg-gradient-to-r from-indigo-500 to-violet-500' : s >= 75 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-red-400'
 const speedColor = (s: string) => s === 'Sangat Cepat' ? 'text-emerald-400' : s === 'Cepat' ? 'text-blue-400' : s === 'Sedang' ? 'text-yellow-400' : 'text-red-400'
+
+const speedMap: Record<string, string> = {
+  'Sangat Cepat': 'speed.veryFast',
+  'Cepat': 'speed.fast',
+  'Sedang': 'speed.medium',
+  'Lambat': 'speed.slow',
+}
+const speedLabel = (s: string) => speedMap[s] ? t(speedMap[s]) : s
 </script>

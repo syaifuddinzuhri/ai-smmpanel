@@ -16,7 +16,7 @@
         >
           <div class="flex items-center gap-2">
             <div class="w-1.5 h-5 rounded bg-gradient-to-b from-indigo-500 to-violet-600" />
-            <span class="text-[15px] font-bold text-slate-900 dark:text-white">Komparasi Layanan</span>
+            <span class="text-[15px] font-bold text-slate-900 dark:text-white">{{ t('modal.title') }}</span>
             <span class="text-[11px] px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 font-semibold">
               {{ selected.length }}
             </span>
@@ -40,7 +40,7 @@
                     class="sticky left-0 z-10 text-left px-5 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-500 w-32 bg-slate-50 dark:bg-[#0f1420]"
                     :style="{ borderBottom: '1px solid var(--border)' }"
                   >
-                    Metrik
+                    {{ t('modal.metric') }}
                   </th>
                   <th
                     v-for="svc in selected"
@@ -92,7 +92,7 @@
                         ]"
                       >
                         <Icon :name="cell.value ? 'heroicons:check' : 'heroicons:x-mark'" class="w-3 h-3" />
-                        {{ cell.value ? 'Ya' : 'Tidak' }}
+                        {{ cell.value ? t('modal.yes') : t('modal.no') }}
                       </span>
                     </template>
 
@@ -108,14 +108,14 @@
                         <span
                           v-if="cell.isBest"
                           class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 uppercase tracking-wide"
-                        >Terbaik</span>
+                        >{{ t('modal.best') }}</span>
                       </div>
                     </template>
 
                     <!-- Health (Sehat/Tidak) -->
                     <template v-else-if="row.type === 'health'">
                       <template v-if="cell.total === 0">
-                        <span class="text-slate-400 text-[12px]">— Belum ada data</span>
+                        <span class="text-slate-400 text-[12px]">{{ t('modal.noData') }}</span>
                       </template>
                       <template v-else>
                         <div class="flex flex-col items-center gap-1">
@@ -128,7 +128,7 @@
                             ]"
                           >
                             <Icon :name="(cell.cancelRate ?? 0) < 5 ? 'heroicons:check-circle' : 'heroicons:exclamation-triangle'" class="w-3 h-3" />
-                            {{ (cell.cancelRate ?? 0) < 5 ? 'Sehat' : 'Perlu Perhatian' }}
+                            {{ (cell.cancelRate ?? 0) < 5 ? t('modal.healthy') : t('modal.attention') }}
                           </span>
                           <span class="text-[10px] text-slate-500">Cancel {{ cell.cancelRate?.toFixed(1) }}%</span>
                         </div>
@@ -151,8 +151,8 @@
                           <span
                             v-if="cell.isBest"
                             class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 uppercase tracking-wide"
-                          >Terlaris</span>
-                          <span v-else class="text-[10px] text-slate-400">order</span>
+                          >{{ t('modal.popular') }}</span>
+                          <span v-else class="text-[10px] text-slate-400">{{ t('modal.orders') }}</span>
                         </div>
                       </template>
                     </template>
@@ -210,14 +210,14 @@
         >
           <p class="text-[11px] text-slate-500 flex items-center gap-1.5">
             <Icon name="heroicons:light-bulb" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-            Nilai <span class="text-emerald-600 dark:text-emerald-400 font-semibold mx-0.5">terbaik</span> disorot hijau · Sehat jika cancel &lt; 5%
+            <span v-html="t('modal.hint')"></span>
           </p>
           <button
             class="px-4 py-1.5 rounded-lg text-[12px] font-semibold transition-colors text-slate-500 hover:text-slate-900 dark:hover:text-white"
             :style="{ background: 'var(--bg-input)', border: '1px solid var(--border)' }"
             @click="$emit('close')"
           >
-            Tutup
+            {{ t('btn.close') }}
           </button>
         </div>
       </div>
@@ -228,6 +228,8 @@
 <script setup lang="ts">
 import type { RawService } from '~/server/api/services.get'
 import type { RawOrder } from '~/server/api/orders.get'
+
+const { t } = useLang()
 
 const props = defineProps<{
   allServices: RawService[]
@@ -347,15 +349,15 @@ const rows = computed((): Row[] => {
   })
 
   return [
-    textRow('kategori', 'Kategori', s => s.category),
-    numRow('rate',  'Harga / 100', s => Number(s.rate) / 10, fmtRate, 'min'),
-    { key: 'popular',  label: 'Total Order',       type: 'popular', cells: popularCells },
-    { key: 'health',   label: 'Kondisi',          type: 'health',  cells: healthCells },
-    boolRow('refill', 'Refill', s => !!s.refill),
-    boolRow('cancel', 'Cancel', s => !!s.cancel),
-    numRow('min',   'Min Order',    s => Number(s.min),  fmtNum,  'min'),
-    numRow('max',   'Max Order',    s => Number(s.max),  fmtNum,  'max'),
-    { key: 'dist',     label: 'Distribusi Status', type: 'dist',    cells: distCells },
+    textRow('kategori', t('modal.colCategory'),    s => s.category),
+    numRow('rate',      t('modal.colPrice'),        s => Number(s.rate) / 10, fmtRate, 'min'),
+    { key: 'popular',  label: t('modal.colTotalOrder'),    type: 'popular', cells: popularCells },
+    { key: 'health',   label: t('modal.colCondition'),     type: 'health',  cells: healthCells },
+    boolRow('refill',  t('modal.colRefill'),        s => !!s.refill),
+    boolRow('cancel',  t('modal.colCancel'),        s => !!s.cancel),
+    numRow('min',      t('modal.colMinOrder'),      s => Number(s.min),  fmtNum,  'min'),
+    numRow('max',      t('modal.colMaxOrder'),      s => Number(s.max),  fmtNum,  'max'),
+    { key: 'dist',     label: t('modal.colDistribution'),  type: 'dist',    cells: distCells },
   ]
 })
 </script>

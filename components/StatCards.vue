@@ -28,6 +28,8 @@
 </template>
 
 <script setup lang="ts">
+const { t } = useLang()
+
 const props = defineProps<{
   isLoading: boolean
   stats: { total: number; avgScore: number; avgSuccess: string; totalOrders: number; risky: number; trending: number }
@@ -37,34 +39,34 @@ const statItems = computed(() => [
   {
     icon: 'heroicons:wrench-screwdriver',
     accent: 'bg-indigo-500', labelColor: 'text-indigo-400',
-    label: 'Total Layanan', value: props.stats.total,
+    label: t('stat.totalServices'), value: props.stats.total,
     trendIcon: 'heroicons:arrow-trending-up',
-    trendLabel: `${props.stats.trending} sedang trending`,
+    trendLabel: t('stat.trending', { n: props.stats.trending }),
     trendColor: 'text-emerald-400',
   },
   {
     icon: 'heroicons:cpu-chip',
     accent: 'bg-violet-500', labelColor: 'text-violet-400',
-    label: 'Rata-rata AI Score', value: `${props.stats.avgScore}/100`,
+    label: t('stat.avgScore'), value: `${props.stats.avgScore}/100`,
     trendIcon: 'heroicons:arrow-right',
-    trendLabel: 'Performa stabil',
+    trendLabel: t('stat.stable'),
     trendColor: 'text-slate-400',
   },
   {
     icon: 'heroicons:check-circle',
     accent: 'bg-emerald-500', labelColor: 'text-emerald-400',
-    label: 'Avg. Success Rate', value: `${props.stats.avgSuccess}%`,
+    label: t('stat.avgSuccess'), value: `${props.stats.avgSuccess}%`,
     trendIcon: 'heroicons:arrow-up',
-    trendLabel: 'Di atas rata-rata',
+    trendLabel: t('stat.aboveAvg'),
     trendColor: 'text-emerald-400',
   },
   {
     icon: 'heroicons:archive-box',
     accent: props.stats.risky > 0 ? 'bg-amber-500' : 'bg-blue-500',
     labelColor: 'text-blue-400',
-    label: 'Total Order', value: props.stats.totalOrders.toLocaleString('id-ID'),
+    label: t('stat.totalOrders'), value: props.stats.totalOrders.toLocaleString('id-ID'),
     trendIcon: props.stats.risky > 0 ? 'heroicons:exclamation-triangle' : 'heroicons:check',
-    trendLabel: props.stats.risky > 0 ? `${props.stats.risky} berisiko` : 'Semua aman',
+    trendLabel: props.stats.risky > 0 ? t('stat.risky', { n: props.stats.risky }) : t('stat.allSafe'),
     trendColor: props.stats.risky > 0 ? 'text-amber-400' : 'text-emerald-400',
   },
 ])

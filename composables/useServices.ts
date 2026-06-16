@@ -100,13 +100,14 @@ export const useServices = () => {
 
   const periods = ['6J', '24J', '48J', '7 Hari']
 
-  const sortOptions = [
-    { value: 'score', label: 'Sort: AI Score' },
-    { value: 'success', label: 'Sort: Success Rate' },
-    { value: 'orders', label: 'Sort: Order Count' },
-    { value: 'trending', label: 'Sort: Trending' },
-    { value: 'cancel', label: 'Sort: Cancel Rate ↑' },
-  ]
+  const { t } = useLang()
+  const sortOptions = computed(() => [
+    { value: 'score',    label: t('sort.score') },
+    { value: 'success',  label: t('sort.success') },
+    { value: 'orders',   label: t('sort.orders') },
+    { value: 'trending', label: t('sort.trending') },
+    { value: 'cancel',   label: t('sort.cancel') },
+  ])
 
   const filteredServices = computed(() => {
     let result = services.value

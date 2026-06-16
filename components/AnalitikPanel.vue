@@ -3,8 +3,8 @@
     <!-- Empty state -->
     <div v-if="!isLoading && rawOrders.length === 0" class="card p-12 text-center">
       <Icon name="heroicons:chart-bar" class="w-10 h-10 text-slate-600 mx-auto mb-3" />
-      <p class="text-slate-400 font-medium">Belum ada data analitik</p>
-      <p class="text-slate-600 text-[12px] mt-1">Sync data order terlebih dahulu untuk melihat analitik</p>
+      <p class="text-slate-400 font-medium">{{ t('analitik.noData') }}</p>
+      <p class="text-slate-600 text-[12px] mt-1">{{ t('analitik.syncFirst') }}</p>
     </div>
 
     <template v-else>
@@ -38,9 +38,9 @@
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-4 rounded bg-gradient-to-b from-indigo-500 to-violet-600"></div>
-              <span class="text-[13px] font-bold text-slate-900 dark:text-white">Aktivitas Order</span>
+              <span class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('analitik.activity') }}</span>
             </div>
-            <span class="text-[11px] text-slate-500">{{ rawOrders.length.toLocaleString('id-ID') }} order · {{ selectedPeriod }}</span>
+            <span class="text-[11px] text-slate-500">{{ rawOrders.length.toLocaleString('id-ID') }} {{ t('analitik.orderUnit') }} · {{ selectedPeriod }}</span>
           </div>
           <div v-if="isLoading" class="skeleton w-full h-[80px]"></div>
           <template v-else>
@@ -52,7 +52,6 @@
                 :class="bar.count > 0 ? 'bg-gradient-to-t from-indigo-600 to-violet-500' : 'bg-slate-200 dark:bg-white/[0.04]'"
                 :style="{ height: bar.count > 0 ? Math.max(6, Math.round(bar.count / chartMax * 100)) + '%' : '4px' }"
               >
-                <!-- Tooltip -->
                 <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-semibold whitespace-nowrap z-10 shadow-lg"
                   :style="{ background: 'var(--bg-card)', border: '1px solid var(--border-str)' }">
                   <span class="text-slate-500">{{ bar.label }}</span>
@@ -70,9 +69,8 @@
         <div class="card p-5">
           <div class="flex items-center gap-2 mb-4">
             <div class="w-1.5 h-4 rounded bg-gradient-to-b from-emerald-500 to-blue-500"></div>
-            <span class="text-[13px] font-bold text-slate-900 dark:text-white">Distribusi Status</span>
+            <span class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('analitik.statusDist') }}</span>
           </div>
-          <!-- Stacked bar -->
           <div v-if="!isLoading" class="flex h-2 rounded-full overflow-hidden gap-px mb-4">
             <div
               v-for="s in statusDist.filter(s => s.count > 0)"
@@ -95,7 +93,7 @@
         </div>
       </div>
 
-      <!-- Row 3: Revenue + Category -->
+      <!-- Row 3: Top Volume + Category -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 items-start">
 
         <!-- Top Volume -->
@@ -103,15 +101,15 @@
           <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-2">
               <div class="w-1.5 h-4 rounded bg-gradient-to-b from-indigo-500 to-violet-600"></div>
-              <span class="text-[13px] font-bold text-slate-900 dark:text-white">Layanan Terpopuler</span>
+              <span class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('analitik.topPopular') }}</span>
             </div>
-            <span class="text-[11px] text-slate-500">Berdasarkan jumlah order</span>
+            <span class="text-[11px] text-slate-500">{{ t('analitik.byOrderCount') }}</span>
           </div>
           <div v-if="isLoading" class="space-y-3">
             <div v-for="i in 5" :key="i" class="skeleton w-full h-7"></div>
           </div>
           <div v-else-if="topVolume.length === 0" class="text-center py-6">
-            <p class="text-slate-500 text-[12px]">Tidak ada data order tersedia</p>
+            <p class="text-slate-500 text-[12px]">{{ t('analitik.noOrderData') }}</p>
           </div>
           <div v-else class="space-y-3">
             <div v-for="(s, i) in topVolume" :key="s.serviceId" class="flex items-center gap-2.5">
@@ -119,7 +117,7 @@
               <div class="flex-1 min-w-0">
                 <div class="flex justify-between text-[11px] mb-1 gap-2">
                   <span class="text-slate-700 dark:text-slate-300 truncate">{{ s.name }}</span>
-                  <span class="text-indigo-400 font-bold tabular-nums whitespace-nowrap flex-shrink-0">{{ s.count.toLocaleString('id-ID') }} order</span>
+                  <span class="text-indigo-400 font-bold tabular-nums whitespace-nowrap flex-shrink-0">{{ s.count.toLocaleString('id-ID') }} {{ t('analitik.orderUnit') }}</span>
                 </div>
                 <div class="text-[10px] text-slate-500 mb-1">ID: {{ s.serviceId }}</div>
                 <div class="h-1.5 rounded-full overflow-hidden" :style="{ background: 'var(--bg-subtle)' }">
@@ -133,7 +131,7 @@
                 :href="`${panelUrl}?service=${s.serviceId}`"
                 target="_blank" rel="noopener noreferrer"
                 class="inline-flex items-center px-2.5 py-1 rounded-lg bg-indigo-600/80 hover:bg-indigo-500 border border-indigo-500/40 text-white text-[10px] font-semibold transition-colors flex-shrink-0"
-              >Beli</a>
+              >{{ t('btn.buy') }}</a>
             </div>
           </div>
         </div>
@@ -142,13 +140,13 @@
         <div class="card p-5">
           <div class="flex items-center gap-2 mb-4">
             <div class="w-1.5 h-4 rounded bg-gradient-to-b from-indigo-500 to-cyan-500"></div>
-            <span class="text-[13px] font-bold text-slate-900 dark:text-white">Performa per Kategori</span>
+            <span class="text-[13px] font-bold text-slate-900 dark:text-white">{{ t('analitik.categoryPerf') }}</span>
           </div>
           <div v-if="isLoading" class="space-y-3">
             <div v-for="i in 5" :key="i" class="skeleton w-full h-7"></div>
           </div>
           <div v-else-if="categoryPerf.length === 0" class="text-center py-6">
-            <p class="text-slate-500 text-[12px]">Tidak ada data kategori tersedia</p>
+            <p class="text-slate-500 text-[12px]">{{ t('analitik.noCategoryData') }}</p>
           </div>
           <div v-else class="space-y-3">
             <div v-for="cat in categoryPerf" :key="cat.label" class="flex items-center gap-2.5">
@@ -187,6 +185,7 @@
 import type { RawOrder } from '~/server/api/orders.get'
 import type { RawService } from '~/server/api/services.get'
 
+const { t, lang } = useLang()
 const panelUrl = useRuntimeConfig().public.panelUrl
 
 const props = defineProps<{
@@ -197,22 +196,22 @@ const props = defineProps<{
 }>()
 
 const fmtNum = (v: number) => {
-  if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + 'jt'
-  if (v >= 1_000) return (v / 1_000).toFixed(0) + 'rb'
+  if (v >= 1_000_000) return (v / 1_000_000).toFixed(1) + t('analitik.millions')
+  if (v >= 1_000) return (v / 1_000).toFixed(0) + t('analitik.thousands')
   return v.toLocaleString('id-ID')
 }
 
-const DAY_NAMES = ['Min','Sen','Sel','Rab','Kam','Jum','Sab']
+const dayNames = computed(() => [0,1,2,3,4,5,6].map(i => t(`day.${i}`)))
 
 const chartBars = computed(() => {
   const now = Date.now() / 1000
   let intervalSec: number
   let totalBars: number
 
-  if (props.selectedPeriod === '6J')      { intervalSec = 1800;  totalBars = 12 }
-  else if (props.selectedPeriod === '48J') { intervalSec = 7200;  totalBars = 24 }
+  if (props.selectedPeriod === '6J')           { intervalSec = 1800;  totalBars = 12 }
+  else if (props.selectedPeriod === '48J')     { intervalSec = 7200;  totalBars = 24 }
   else if (props.selectedPeriod === '7 Hari') { intervalSec = 86400; totalBars = 7 }
-  else                                     { intervalSec = 3600;  totalBars = 24 } // 24J default
+  else                                          { intervalSec = 3600;  totalBars = 24 }
 
   const bars: { label: string; count: number; from: number; to: number }[] = []
   for (let i = totalBars - 1; i >= 0; i--) {
@@ -220,7 +219,7 @@ const chartBars = computed(() => {
     const from = to - intervalSec
     let label: string
     if (intervalSec === 86400) {
-      label = DAY_NAMES[new Date(to * 1000).getDay()]
+      label = dayNames.value[new Date(to * 1000).getDay()]
     } else {
       const d = new Date(to * 1000)
       label = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0')
@@ -241,7 +240,6 @@ const chartBars = computed(() => {
 
 const chartMax = computed(() => Math.max(...chartBars.value.map(b => b.count), 1))
 
-// Show ~6 evenly-spaced X-axis labels
 const chartXLabels = computed(() => {
   const n = chartBars.value.length
   const step = Math.max(1, Math.floor(n / 6))
@@ -305,10 +303,10 @@ const summaryCards = computed(() => {
   const completed = props.rawOrders.filter(o => ['completed', 'partial'].includes(o.status)).length
   const successRate = total > 0 ? Math.round(completed / total * 100) : 0
   return [
-    { label: 'Total Order',    value: fmtNum(total),    sub: 'pada periode ini',   icon: 'heroicons:rectangle-stack',  bg: 'bg-indigo-500/10',  color: 'text-indigo-400',  bar: 'bg-indigo-500'  },
-    { label: 'Total Kuantitas',value: fmtNum(totalQty), sub: 'unit diproses',      icon: 'heroicons:arrow-trending-up', bg: 'bg-emerald-500/10', color: 'text-emerald-400', bar: 'bg-emerald-500' },
-    { label: 'Success Rate',   value: successRate + '%',sub: 'completed + partial', icon: 'heroicons:check-circle',     bg: 'bg-teal-500/10',    color: 'text-teal-400',    bar: 'bg-teal-500'    },
-    { label: 'Layanan Aktif',  value: String(uniqueSvc),sub: 'layanan berbeda',    icon: 'heroicons:archive-box',       bg: 'bg-violet-500/10',  color: 'text-violet-400',  bar: 'bg-violet-500'  },
+    { label: t('analitik.totalOrder'),    value: fmtNum(total),    sub: t('analitik.thisPeriod'),         icon: 'heroicons:rectangle-stack',  bg: 'bg-indigo-500/10',  color: 'text-indigo-400',  bar: 'bg-indigo-500'  },
+    { label: t('analitik.totalQty'),      value: fmtNum(totalQty), sub: t('analitik.unitsProcessed'),    icon: 'heroicons:arrow-trending-up', bg: 'bg-emerald-500/10', color: 'text-emerald-400', bar: 'bg-emerald-500' },
+    { label: t('analitik.successRate'),   value: successRate + '%',sub: t('analitik.completedPartial'),   icon: 'heroicons:check-circle',     bg: 'bg-teal-500/10',    color: 'text-teal-400',    bar: 'bg-teal-500'    },
+    { label: t('analitik.activeServices'),value: String(uniqueSvc),sub: t('analitik.differentServices'), icon: 'heroicons:archive-box',       bg: 'bg-violet-500/10',  color: 'text-violet-400',  bar: 'bg-violet-500'  },
   ]
 })
 </script>
