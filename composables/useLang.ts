@@ -479,12 +479,15 @@ const dict: Record<Lang, Record<string, string>> = {
 }
 
 export const useLang = () => {
-  const lang = useState<Lang>('lang', () => 'id')
+  const { public: cfg } = useRuntimeConfig()
+  const envDefault: Lang = cfg.defaultLang === 'en' ? 'en' : 'id'
+  const lang = useState<Lang>('lang', () => envDefault)
 
   function init() {
     if (import.meta.client) {
       const saved = localStorage.getItem('lang') as Lang | null
       if (saved === 'id' || saved === 'en') lang.value = saved
+      else lang.value = envDefault
     }
   }
 

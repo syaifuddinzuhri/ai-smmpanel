@@ -45,6 +45,7 @@ export default defineNuxtConfig({
       appTagline:  app.tagline,
       appMetaTitle: app.metaTitle,
       appMetaDesc:  app.metaDesc,
+      defaultLang: (process.env.NUXT_PUBLIC_DEFAULT_LANG === 'en' ? 'en' : 'id') as 'id' | 'en',
     },
   },
 
