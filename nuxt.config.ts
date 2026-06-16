@@ -4,25 +4,25 @@ const brandConfig: Record<string, { name: string; tagline: string; metaTitle: st
   smmbuzzer: {
     name: 'SmmBuzzer',
     tagline: 'Monitoring Layanan',
-    metaTitle: 'AI Rekomendasi Layanan — SmmBuzzer',
+    metaTitle: 'Monitoring Layanan — SmmBuzzer',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmBuzzer',
   },
   djuragan: {
     name: 'Djuragan Sosmed',
     tagline: 'Monitoring Layanan',
-    metaTitle: 'AI Rekomendasi Layanan — Djuragan Sosmed',
+    metaTitle: 'Monitoring Layanan — Djuragan Sosmed',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by Djuragan Sosmed',
   },
   smmctrl: {
     name: 'SmmCtrl',
     tagline: 'Monitoring Layanan',
-    metaTitle: 'AI Rekomendasi Layanan — SmmCtrl',
+    metaTitle: 'Monitoring Layanan — SmmCtrl',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmCtrl',
   },
   smmlive: {
     name: 'SmmLive',
     tagline: 'Monitoring Layanan',
-    metaTitle: 'AI Rekomendasi Layanan — SmmLive',
+    metaTitle: 'Monitoring Layanan — SmmLive',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmLive',
   },
 }
