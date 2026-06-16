@@ -34,12 +34,12 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
 
   runtimeConfig: {
-    apiBaseUrl: process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com',
+    apiBaseUrl: process.env.NUXT_API_BASE_URL || '',
     apiAdminKey: process.env.NUXT_API_ADMIN_KEY || '',
     apiV2Key: process.env.NUXT_API_V2_KEY || '',
     anthropicApiKey: process.env.ANTHROPIC_API_KEY || '',
     public: {
-      panelUrl:    process.env.NUXT_API_BASE_URL || 'https://smmbuzzer.com',
+      panelUrl:    process.env.NUXT_API_BASE_URL || '',
       appBrand:    brand,
       appName:     app.name,
       appTagline:  app.tagline,
