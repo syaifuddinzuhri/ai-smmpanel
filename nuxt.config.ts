@@ -13,6 +13,18 @@ const brandConfig: Record<string, { name: string; tagline: string; metaTitle: st
     metaTitle: 'AI Rekomendasi Layanan — Djuragan Sosmed',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by Djuragan Sosmed',
   },
+  smmctrl: {
+    name: 'SmmCtrl',
+    tagline: 'Monitoring Layanan',
+    metaTitle: 'AI Rekomendasi Layanan — SmmCtrl',
+    metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmCtrl',
+  },
+  smmlive: {
+    name: 'SmmLive',
+    tagline: 'Monitoring Layanan',
+    metaTitle: 'AI Rekomendasi Layanan — SmmLive',
+    metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmLive',
+  },
 }
 
 const app = brandConfig[brand] ?? brandConfig.smmbuzzer
