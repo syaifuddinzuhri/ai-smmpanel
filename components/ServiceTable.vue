@@ -255,8 +255,8 @@ defineEmits(['update:selectedSort'])
 
 const { public: { panelUrl, appName } } = useRuntimeConfig()
 
-const scoreColor    = (s: number) => s >= 95 ? 'text-emerald-400' : s >= 85 ? 'text-violet-400' : s >= 75 ? 'text-yellow-400' : 'text-red-400'
-const scoreBarColor = (s: number) => s >= 95 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : s >= 85 ? 'bg-gradient-to-r from-indigo-500 to-violet-500' : s >= 75 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-red-400'
+const scoreColor    = (s: number) => s >= 80 ? 'text-emerald-400' : s >= 60 ? 'text-yellow-400' : 'text-red-400'
+const scoreBarColor = (s: number) => s >= 80 ? 'bg-gradient-to-r from-emerald-500 to-emerald-400' : s >= 60 ? 'bg-gradient-to-r from-yellow-500 to-amber-400' : 'bg-gradient-to-r from-red-500 to-red-400'
 const speedColor = (s: string) => s === 'Sangat Cepat' ? 'text-emerald-400' : s === 'Cepat' ? 'text-blue-400' : s === 'Sedang' ? 'text-yellow-400' : 'text-red-400'
 
 const speedMap: Record<string, string> = {

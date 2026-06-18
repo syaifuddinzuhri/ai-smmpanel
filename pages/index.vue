@@ -132,7 +132,7 @@
                 </div>
                 <div class="flex items-center gap-3 flex-shrink-0">
                   <div class="text-right">
-                    <p :class="['text-[15px] font-black', svc.aiScore >= 95 ? 'text-emerald-400' : 'text-violet-400']">{{ svc.aiScore }}</p>
+                    <p :class="['text-[15px] font-black', svc.aiScore >= 80 ? 'text-emerald-400' : svc.aiScore >= 60 ? 'text-yellow-400' : 'text-red-400']">{{ svc.aiScore }}</p>
                     <p class="text-slate-600 text-[10px]">{{ t('label.score') }}</p>
                   </div>
                   <a :href="`${panelUrl}?service=${svc.id}`" target="_blank" rel="noopener noreferrer"

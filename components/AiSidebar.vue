@@ -79,7 +79,7 @@
             <p class="text-slate-500 dark:text-slate-600 text-[11px]">ID: {{ svc.id }} · {{ svc.successRate }}% · {{ svc.orderCount.toLocaleString('id-ID') }} orders</p>
           </div>
           <div class="flex flex-col items-end gap-1 flex-shrink-0">
-            <p :class="['text-[13px] font-bold', svc.aiScore >= 95 ? 'text-emerald-400' : 'text-violet-400']">{{ svc.aiScore }}</p>
+            <p :class="['text-[13px] font-bold', svc.aiScore >= 80 ? 'text-emerald-400' : svc.aiScore >= 60 ? 'text-yellow-400' : 'text-red-400']">{{ svc.aiScore }}</p>
             <a
               :href="`${panelUrl}?service=${svc.id}`"
               target="_blank" rel="noopener noreferrer"
