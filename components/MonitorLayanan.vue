@@ -176,7 +176,7 @@
             <!-- Harga/100 -->
             <div class="hidden md:block text-center">
               <p class="text-indigo-400 dark:text-indigo-300 text-[13px] font-semibold tabular-nums">
-                {{ Number(svc.rate) > 0 ? formatPrice(currency === 'USD' ? Number(svc.rate) : Math.round(Number(svc.rate) / 10)) : '—' }}
+                {{ Number(svc.rate) > 0 ? formatPrice(configCurrency === 'USD' ? Number(svc.rate) / 10 : Math.round(Number(svc.rate) / 10)) : '—' }}
               </p>
               <p class="text-slate-700 text-[10px]">{{ t('monitor.per100') }}</p>
             </div>
@@ -366,7 +366,7 @@ import type { RawService } from '~/server/api/services.get'
 import type { RawOrder } from '~/server/api/orders.get'
 
 const { t } = useLang()
-const { formatPrice, currency } = useCurrency()
+const { formatPrice, configCurrency } = useCurrency()
 const panelUrl = useRuntimeConfig().public.panelUrl
 
 function platformLabel(label: string): string {

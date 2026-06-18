@@ -143,7 +143,7 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap
       trend,
       trendPercent,
       price: currency === 'USD'
-        ? Number(Number(svc?.rate ?? avgPrice).toFixed(6))
+        ? Number((Number(svc?.rate ?? avgPrice) / 10).toFixed(6))
         : Math.round(Number(svc?.rate ?? avgPrice) / 10),
       minOrder: svc ? Number(svc.min) : (svcOrders.reduce((m, o) => Math.min(m, Number(o.quantity) || 0), Infinity) || 0),
       speed: mapSpeed(svc?.type ?? sample.service_type),

@@ -19,10 +19,20 @@
         </div>
 
         <div class="ml-auto flex items-center gap-2">
-          <!-- Update time: hanya desktop -->
-          <div v-if="!isLoading" class="hidden sm:flex items-center gap-1.5 text-[11px] text-slate-500">
-            <Icon name="heroicons:clock" class="w-3 h-3" />
-            {{ t('header.lastUpdate') }}: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
+          <!-- Update time + kurs: hanya desktop -->
+          <div v-if="!isLoading" class="hidden sm:flex items-center gap-3 text-[11px] text-slate-500">
+            <div class="flex items-center gap-1.5">
+              <Icon name="heroicons:clock" class="w-3 h-3" />
+              {{ t('header.lastUpdate') }}: <span class="text-indigo-400 font-medium">{{ lastUpdate }} WIB</span>
+            </div>
+            <span class="text-slate-600 dark:text-slate-700">·</span>
+            <div class="flex items-center gap-1.5">
+              <Icon name="heroicons:arrows-right-left" class="w-3 h-3" />
+              <span>$1 =</span>
+              <span class="text-emerald-400 dark:text-emerald-300 font-semibold tabular-nums">
+                Rp {{ kurs.toLocaleString('id-ID') }}
+              </span>
+            </div>
           </div>
           <!-- Theme toggle -->
           <button
@@ -36,7 +46,7 @@
           <!-- Language dropdown -->
           <div class="relative" ref="langRef">
             <button
-              @click.stop="showLangDropdown = !showLangDropdown"
+              @click.stop="showLangDropdown = !showLangDropdown; showCurrencyDropdown = false"
               class="flex items-center gap-1 px-2 h-7 rounded-lg border text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-[11px] font-bold"
               :style="{ background: 'var(--bg-input)', borderColor: 'var(--border)' }"
             >
@@ -62,6 +72,45 @@
                   <span class="text-base leading-none">{{ opt.flag }}</span>
                   <span>{{ opt.label }}</span>
                   <Icon v-if="lang === opt.value" name="heroicons:check" class="w-3 h-3 ml-auto text-indigo-400" />
+                </button>
+              </div>
+            </Transition>
+          </div>
+          <!-- Currency dropdown -->
+          <div class="relative" ref="currencyRef">
+            <button
+              @click.stop="showCurrencyDropdown = !showCurrencyDropdown; showLangDropdown = false"
+              class="flex items-center gap-1 px-2 h-7 rounded-lg border text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-all duration-200 text-[11px] font-bold"
+              :style="{ background: 'var(--bg-input)', borderColor: 'var(--border)' }"
+            >
+              <Icon name="heroicons:currency-dollar" class="w-3 h-3 flex-shrink-0" />
+              {{ currency }}
+              <Icon name="heroicons:chevron-down" class="w-2.5 h-2.5 flex-shrink-0 transition-transform duration-150" :class="showCurrencyDropdown ? 'rotate-180' : ''" />
+            </button>
+            <Transition name="dropdown">
+              <div
+                v-if="showCurrencyDropdown"
+                class="absolute right-0 top-full mt-1.5 z-50 rounded-xl shadow-xl overflow-hidden min-w-[150px]"
+                :style="{ background: 'var(--bg-card)', border: '1px solid var(--border-str)' }"
+              >
+                <!-- Kurs live indicator -->
+                <div class="flex items-center gap-1.5 px-3 py-2 border-b text-[11px]" :style="{ borderColor: 'var(--border)' }">
+                  <Icon name="heroicons:arrows-right-left" class="w-3 h-3 text-slate-400 flex-shrink-0" />
+                  <span class="text-slate-500">$1 =</span>
+                  <span class="text-emerald-400 font-semibold tabular-nums">Rp {{ kurs.toLocaleString('id-ID') }}</span>
+                </div>
+                <button
+                  v-for="opt in currencyOptions"
+                  :key="opt.value"
+                  @click="setCurrency(opt.value).then(() => { showCurrencyDropdown = false })"
+                  class="w-full flex items-center gap-2 px-3 py-2 text-[12px] font-semibold transition-colors text-left"
+                  :class="currency === opt.value
+                    ? 'text-indigo-400 bg-indigo-500/10'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-[var(--row-hover)]'"
+                >
+                  <span class="text-base leading-none">{{ opt.flag }}</span>
+                  <span>{{ opt.label }}</span>
+                  <Icon v-if="currency === opt.value" name="heroicons:check" class="w-3 h-3 ml-auto text-indigo-400" />
                 </button>
               </div>
             </Transition>
@@ -268,12 +317,20 @@
 <script setup lang="ts">
 const { isDark, toggle: toggleTheme } = useTheme()
 const { lang, setLang, t } = useLang()
+const { currency, kurs, setCurrency, init: initCurrency } = useCurrency()
 
 const showLangDropdown = ref(false)
 const langRef = ref<HTMLElement | null>(null)
 const langOptions = [
   { value: 'id' as const, label: 'Indonesia', flag: '🇮🇩' },
   { value: 'en' as const, label: 'English',   flag: '🇺🇸' },
+]
+
+const showCurrencyDropdown = ref(false)
+const currencyRef = ref<HTMLElement | null>(null)
+const currencyOptions = [
+  { value: 'IDR' as const, label: 'IDR — Rupiah', flag: '🇮🇩' },
+  { value: 'USD' as const, label: 'USD — Dollar', flag: '🇺🇸' },
 ]
 const { public: cfg } = useRuntimeConfig()
 const props = withDefaults(defineProps<{
@@ -354,9 +411,15 @@ function handleDocClick(e: MouseEvent) {
   if (showLangDropdown.value && langRef.value && !langRef.value.contains(e.target as Node)) {
     showLangDropdown.value = false
   }
+  if (showCurrencyDropdown.value && currencyRef.value && !currencyRef.value.contains(e.target as Node)) {
+    showCurrencyDropdown.value = false
+  }
 }
 
-onMounted(() => document.addEventListener('click', handleDocClick))
+onMounted(async () => {
+  document.addEventListener('click', handleDocClick)
+  await initCurrency()
+})
 onBeforeUnmount(() => document.removeEventListener('click', handleDocClick))
 </script>
 

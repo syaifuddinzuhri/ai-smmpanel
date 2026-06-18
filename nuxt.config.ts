@@ -59,7 +59,7 @@ export default defineNuxtConfig({
   nitro: {
     experimental: { tasks: true },
     scheduledTasks: {
-      '*/3 * * * *': ['sync-db'],
+      '*/3 * * * *': ['sync-db', 'sync-kurs'],
     },
   },
 
