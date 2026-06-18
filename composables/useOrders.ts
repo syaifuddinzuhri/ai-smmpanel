@@ -236,8 +236,22 @@ export const useOrders = (period?: Ref<string>) => {
     watch(period, (p) => resync(p), { immediate: false })
   }
 
+  const POLL_MS = 3 * 60 * 1000 // 3 menit
+  let pollTimer: ReturnType<typeof setInterval> | null = null
+
   onMounted(async () => {
     await Promise.all([fetchOrders(), fetchServices()])
+    pollTimer = setInterval(() => {
+      fetchOrders()
+      fetchServices()
+    }, POLL_MS)
+  })
+
+  onUnmounted(() => {
+    if (pollTimer !== null) {
+      clearInterval(pollTimer)
+      pollTimer = null
+    }
   })
 
   return { services, rawOrders, rawServicesList, isLoading, fromCache, apiError, updatedAt, lastUpdate, fetchOrders, fetchServices, resync }

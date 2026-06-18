@@ -49,6 +49,13 @@ export default defineNuxtConfig({
     },
   },
 
+  nitro: {
+    experimental: { tasks: true },
+    scheduledTasks: {
+      '*/3 * * * *': ['sync:db'],
+    },
+  },
+
   modules: ['@nuxtjs/tailwindcss'],
   app: {
     head: {
