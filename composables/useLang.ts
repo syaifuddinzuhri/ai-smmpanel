@@ -42,6 +42,10 @@ const dict: Record<Lang, Record<string, string>> = {
     'table.colService': 'Layanan',
     'table.colPrice': 'Harga / 100',
     'table.colAction': 'Aksi',
+    'table.scoreLegend': 'Rekomendasi Score:',
+    'table.scoreHigh': 'Sangat direkomendasikan',
+    'table.scoreMid': 'Cukup baik',
+    'table.scoreLow': 'Berisiko',
 
     // Speed values (from API data)
     'speed.veryFast': 'Sangat Cepat',
@@ -280,6 +284,10 @@ const dict: Record<Lang, Record<string, string>> = {
     'table.colService': 'Service',
     'table.colPrice': 'Price / 100',
     'table.colAction': 'Action',
+    'table.scoreLegend': 'Score Guide:',
+    'table.scoreHigh': 'Highly recommended',
+    'table.scoreMid': 'Good',
+    'table.scoreLow': 'Risky',
 
     // Speed values
     'speed.veryFast': 'Super Fast',

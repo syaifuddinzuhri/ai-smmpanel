@@ -22,6 +22,23 @@
       </div>
     </div>
 
+    <!-- Score legend -->
+    <div class="flex items-center gap-4 px-4 py-2 flex-wrap" :style="{ borderBottom: '1px solid var(--border)', background: 'var(--bg-subtle)' }">
+      <span class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider hidden sm:inline">{{ t('table.scoreLegend') }}</span>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 flex-shrink-0"></span>
+        <span class="text-[11px] text-slate-600 dark:text-slate-400">AI Score ≥ 80 — <span class="text-emerald-400 font-semibold">{{ t('table.scoreHigh') }}</span></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-yellow-400 flex-shrink-0"></span>
+        <span class="text-[11px] text-slate-600 dark:text-slate-400">60–79 — <span class="text-yellow-400 font-semibold">{{ t('table.scoreMid') }}</span></span>
+      </div>
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-red-400 flex-shrink-0"></span>
+        <span class="text-[11px] text-slate-600 dark:text-slate-400">&lt; 60 — <span class="text-red-400 font-semibold">{{ t('table.scoreLow') }}</span></span>
+      </div>
+    </div>
+
     <!-- Loading -->
     <div v-if="isLoading" class="flex flex-col items-center justify-center py-16 gap-4">
       <div class="relative w-12 h-12">
