@@ -125,7 +125,7 @@
 
             <!-- Success -->
             <td class="px-3 py-3 text-center">
-              <span :class="['text-[13px] font-semibold tabular-nums', svc.successRate >= 98 ? 'text-emerald-400' : svc.successRate >= 95 ? 'text-yellow-400' : 'text-red-400']">
+              <span :class="['text-[13px] font-semibold tabular-nums', svc.successRate >= 95 ? 'text-emerald-400' : svc.successRate >= 80 ? 'text-yellow-400' : 'text-red-400']">
                 {{ svc.successRate }}%
               </span>
             </td>
@@ -211,7 +211,7 @@
             <p class="text-slate-600 text-[10px]">{{ t('label.score') }}</p>
           </div>
           <div class="rounded-lg p-2 text-center" :style="{ background: 'var(--bg-subtle)' }">
-            <p :class="['text-[13px] font-semibold', svc.successRate >= 98 ? 'text-emerald-400' : 'text-yellow-400']">{{ svc.successRate }}%</p>
+            <p :class="['text-[13px] font-semibold', svc.successRate >= 95 ? 'text-emerald-400' : svc.successRate >= 80 ? 'text-yellow-400' : 'text-red-400']">{{ svc.successRate }}%</p>
             <p class="text-slate-600 text-[10px]">Success</p>
           </div>
           <div class="rounded-lg p-2 text-center" :style="{ background: 'var(--bg-subtle)' }">

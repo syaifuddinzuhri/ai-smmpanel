@@ -103,7 +103,7 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap
 
     const volumeScore = Math.min(total / maxOrders, 1) * 100
     const aiScore = Math.min(100, Math.max(0, Math.round(
-      successRate * 0.55 + Math.max(0, 100 - cancelRate * 15) * 0.30 + volumeScore * 0.15
+      successRate * 0.60 + Math.max(0, 100 - cancelRate * 6) * 0.25 + volumeScore * 0.15
     )))
 
     const recentCount = svcOrders.filter(o => !o.created_timestamp || o.created_timestamp > midpoint).length
