@@ -74,7 +74,7 @@ function mapSpeed(type: string): Service['speed'] {
   return 'Cepat'
 }
 
-function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap?: Map<number, RawService>): Service[] {
+function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap?: Map<number, RawService>, currency = 'IDR'): Service[] {
   if (!orders.length) return []
 
   const byService = new Map<number, RawOrder[]>()
@@ -142,7 +142,9 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap
       cancelRate,
       trend,
       trendPercent,
-      price: svc ? Math.round(Number(svc.rate) / 10) : Math.round(avgPrice / 10),
+      price: currency === 'USD'
+        ? Number(Number(svc?.rate ?? avgPrice).toFixed(6))
+        : Math.round(Number(svc?.rate ?? avgPrice) / 10),
       minOrder: svc ? Number(svc.min) : (svcOrders.reduce((m, o) => Math.min(m, Number(o.quantity) || 0), Infinity) || 0),
       speed: mapSpeed(svc?.type ?? sample.service_type),
       quality: aiScore >= 90 ? 'Premium' : aiScore >= 80 ? 'High' : 'Standard',
@@ -155,6 +157,9 @@ function ordersToServices(orders: RawOrder[], windowSeconds: number, servicesMap
 }
 
 export const useOrders = (period?: Ref<string>) => {
+  const { public: cfg } = useRuntimeConfig()
+  const currency = cfg.currency as string
+
   const rawOrders = ref<RawOrder[]>([])
   const rawServicesList = ref<RawService[]>([])
   const isLoading = ref(true)
@@ -178,7 +183,7 @@ export const useOrders = (period?: Ref<string>) => {
   })
 
   const services = computed(() =>
-    ordersToServices(periodFiltered.value, periodToSeconds(period?.value ?? '24J'), servicesMap.value)
+    ordersToServices(periodFiltered.value, periodToSeconds(period?.value ?? '24J'), servicesMap.value, currency)
   )
 
   const fetchServices = async () => {

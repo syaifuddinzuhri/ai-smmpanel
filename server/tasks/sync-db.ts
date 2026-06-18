@@ -3,7 +3,7 @@ import { fetchServicesFromApi } from '../api/services.get'
 
 export default defineTask({
   meta: {
-    name: 'sync:db',
+    name: 'sync-db',
     description: 'Refresh orders dan services dari API eksternal ke SQLite setiap 3 menit',
   },
   async run() {

@@ -158,7 +158,7 @@
 
             <!-- Price -->
             <td class="px-3 py-3 text-right whitespace-nowrap w-36">
-              <span class="text-[13px] font-semibold text-indigo-400 tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
+              <span class="text-[13px] font-semibold text-indigo-400 tabular-nums">{{ formatPrice(svc.price) }}</span>
             </td>
 
             <!-- Action -->
@@ -230,7 +230,7 @@
           </div>
         </div>
         <div class="flex items-center justify-between">
-          <span class="text-indigo-400 text-[13px] font-semibold tabular-nums">Rp {{ svc.price.toLocaleString('id-ID') }}</span>
+          <span class="text-indigo-400 text-[13px] font-semibold tabular-nums">{{ formatPrice(svc.price) }}</span>
           <div class="flex items-center gap-1.5">
             <a
               :href="`${panelUrl}?service=${svc.id}`"
@@ -259,6 +259,7 @@
 import type { Service } from '~/composables/useServices'
 
 const { t } = useLang()
+const { formatPrice } = useCurrency()
 
 const props = defineProps<{
   services: Service[]

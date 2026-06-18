@@ -1,29 +1,35 @@
 const brand = process.env.NUXT_PUBLIC_APP_BRAND || 'smmbuzzer'
 
-const brandConfig: Record<string, { name: string; tagline: string; metaTitle: string; metaDesc: string }> = {
+type Currency = 'IDR' | 'USD'
+
+const brandConfig: Record<string, { name: string; tagline: string; metaTitle: string; metaDesc: string; currency: Currency }> = {
   smmbuzzer: {
     name: 'SmmBuzzer',
     tagline: 'Monitoring Layanan',
     metaTitle: 'Monitoring Layanan — SmmBuzzer',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmBuzzer',
+    currency: 'IDR',
   },
   djuragan: {
     name: 'Djuragan Sosmed',
     tagline: 'Monitoring Layanan',
     metaTitle: 'Monitoring Layanan — Djuragan Sosmed',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by Djuragan Sosmed',
+    currency: 'IDR',
   },
   smmctrl: {
     name: 'SmmCtrl',
     tagline: 'Monitoring Layanan',
     metaTitle: 'Monitoring Layanan — SmmCtrl',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmCtrl',
+    currency: 'USD',
   },
   smmlive: {
     name: 'SmmLive',
     tagline: 'Monitoring Layanan',
     metaTitle: 'Monitoring Layanan — SmmLive',
     metaDesc: 'AI-powered SMM panel service recommendation dashboard by SmmLive',
+    currency: 'USD',
   },
 }
 
@@ -46,13 +52,14 @@ export default defineNuxtConfig({
       appMetaTitle: app.metaTitle,
       appMetaDesc:  app.metaDesc,
       defaultLang: (process.env.NUXT_PUBLIC_DEFAULT_LANG === 'en' ? 'en' : 'id') as 'id' | 'en',
+      currency: ((process.env.NUXT_PUBLIC_CURRENCY as Currency) || app.currency) as Currency,
     },
   },
 
   nitro: {
     experimental: { tasks: true },
     scheduledTasks: {
-      '*/3 * * * *': ['sync:db'],
+      '*/3 * * * *': ['sync-db'],
     },
   },
 

@@ -230,6 +230,7 @@ import type { RawService } from '~/server/api/services.get'
 import type { RawOrder } from '~/server/api/orders.get'
 
 const { t } = useLang()
+const { formatPrice, currency } = useCurrency()
 
 const props = defineProps<{
   allServices: RawService[]
@@ -264,7 +265,7 @@ function platformIcon(name: string): string {
 }
 
 function fmtRate(n: number): string {
-  return 'Rp ' + n.toLocaleString('id-ID', { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+  return formatPrice(currency === 'USD' ? n : Math.round(n))
 }
 
 function fmtNum(n: number): string {
